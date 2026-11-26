@@ -209,7 +209,7 @@ function Pavilion({ club, position, pal, hovered, onHover, onOpen }: { club: Dio
           <planeGeometry args={[0.28, 0.24]} />
           <meshStandardMaterial color={pal.glass} roughness={0.15} metalness={0.4} />
         </mesh>
-        <Html center position={[0, 2.05, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+        <Html center position={[0, 2.05, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: "none", visibility: hovered ? "visible" : "hidden" }}>
           <div
             className="whitespace-nowrap rounded-full border border-line bg-surface/95 px-3 py-1.5 text-[12px] font-medium text-ink shadow-lg transition-all duration-300"
             style={{ opacity: hovered ? 1 : 0, transform: `translateY(${hovered ? 0 : 6}px)` }}

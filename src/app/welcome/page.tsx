@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
 import { CampusDiorama, HeroScene } from "@/components/landing/hero-scene";
 import { WingsDeck } from "@/components/landing/wings-deck";
-import { IntroLoader, MarkerRow, RevealLines, ScatterWord, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
+import { IntroLoader, MarkerRow, RevealLines, ScatterWord, ScrollArc, SmoothScroll, Swoosh } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
 import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { ClubMark } from "@/components/ui";
@@ -114,7 +114,7 @@ export default async function WelcomePage() {
               <p className={`hero-rise ${eyebrow}`}>University of Sargodha · Department of Computer Science</p>
               <RevealLines
                 as="h1"
-                lines={["Your department,", <>on one <span key="c" className="fx-underline">campus.</span></>]}
+                lines={["Your department,", <>on one <Swoosh key="c">campus.</Swoosh></>]}
                 className="mt-5 text-[2.8rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-6xl xl:text-[4.6rem]"
               />
               <p className="hero-rise mt-6 max-w-md text-lg leading-relaxed text-ink/70" style={{ animationDelay: "200ms" }}>
@@ -158,7 +158,7 @@ export default async function WelcomePage() {
           <ScrollArc className="absolute inset-0 h-full w-full text-accent opacity-90" />
           <div className="relative mx-auto max-w-[1240px] px-5 pb-28 pt-24 sm:px-8 lg:pt-32">
             <RevealLines
-              lines={["Every club,", "notice and event.", <>Get <span key="c" className="fx-underline">connected.</span></>]}
+              lines={["Every club,", "notice and event.", <>Get <Swoosh key="c">connected.</Swoosh></>]}
               className="relative text-[3.2rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-7xl lg:ml-[16%] lg:text-[8.5rem]"
             />
             <Reveal className="relative mt-14 lg:ml-[46%]">

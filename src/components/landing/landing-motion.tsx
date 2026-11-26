@@ -24,10 +24,15 @@ export function SmoothScroll() {
   return null;
 }
 
-/** A short 0 → 100 intro counter, shown once per browser session. Content is already rendered beneath. */
+/**
+ * Brand intro, once per browser session: the Campus Connect mark draws itself on warm paper,
+ * the terracotta pin drops in, the wordmark rises letter by letter while a hairline progress bar
+ * fills, then the screen opens as a circle from the pin. Waits for the page to finish loading
+ * (max ~2.4s) so the 3D hero is ready underneath. Skipped for reduced motion.
+ */
 export function IntroLoader() {
-  const [value, setValue] = useState(0);
-  const [phase, setPhase] = useState<"count" | "leave" | "gone">("count");
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState<"run" | "open" | "gone">("run");
 
   useEffect(() => {
     let seen = false;
@@ -39,36 +44,83 @@ export function IntroLoader() {
       setPhase("gone");
       return;
     }
+    document.documentElement.style.overflow = "hidden";
     const start = performance.now();
-    const duration = 1100;
+    let loaded = document.readyState === "complete";
+    const onLoad = () => (loaded = true);
+    window.addEventListener("load", onLoad);
     let frame = requestAnimationFrame(function tick(now) {
-      const t = Math.min((now - start) / duration, 1);
-      setValue(Math.round((1 - Math.pow(1 - t, 3)) * 100));
-      if (t < 1) frame = requestAnimationFrame(tick);
-      else setTimeout(() => setPhase("leave"), 150);
+      const elapsed = now - start;
+      // Ease toward 90% on a timer; the last 10% waits for the page load (or 2.4s at most).
+      const timed = Math.min(elapsed / 1500, 1);
+      const p = Math.round((1 - Math.pow(1 - timed, 3)) * 90 + ((loaded && elapsed > 1100) || elapsed > 2400 ? 10 : 0));
+      setProgress(p);
+      if (p >= 100) setTimeout(() => setPhase("open"), 200);
+      else frame = requestAnimationFrame(tick);
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("load", onLoad);
+    };
   }, []);
 
   useEffect(() => {
-    if (phase !== "leave") return;
-    const t = setTimeout(() => setPhase("gone"), 700);
+    if (phase !== "open") return;
+    const t = setTimeout(() => {
+      setPhase("gone");
+      document.documentElement.style.overflow = "";
+    }, 900);
     return () => clearTimeout(t);
   }, [phase]);
 
   if (phase === "gone") return null;
+  const word = "Campus Connect";
   return (
     <div
       aria-hidden
-      className="fixed inset-0 z-[60] flex flex-col justify-between bg-night p-6 text-snow transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] sm:p-10"
-      style={{ transform: phase === "leave" ? "translateY(-100%)" : "none" }}
+      className="intro-loader fixed inset-0 z-[60] flex flex-col items-center justify-center bg-paper text-ink"
+      data-phase={phase}
     >
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-snow/60">Campus Connect · University of Sargodha</p>
-      <div className="flex items-end justify-between">
-        <span className="font-sans text-[22vw] font-normal leading-[0.8] tracking-[-0.06em] tabular-nums sm:text-[14vw]">{value}</span>
-        <span className="mb-3 h-3 w-3 rounded-full bg-accent" />
+      {/* faint blueprint grid, same as the hero */}
+      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_50%_45%_at_50%_50%,black,transparent_80%)]" />
+
+      <svg viewBox="0 0 96 96" className="intro-mark relative h-24 w-24 sm:h-28 sm:w-28">
+        <rect className="intro-tile" x="4" y="4" width="88" height="88" rx="24" fill="var(--ink)" />
+        <path className="intro-c" d="M60 31.9A21 21 0 1 0 60 64.1" fill="none" stroke="var(--paper)" strokeWidth="10.8" strokeLinecap="round" pathLength={1} />
+        <circle className="intro-pin" cx="67.5" cy="48" r="8.4" fill="var(--accent)" />
+      </svg>
+
+      <p className="relative mt-7 flex overflow-hidden text-2xl font-normal tracking-[-0.03em] sm:text-3xl">
+        {[...word].map((ch, i) => (
+          <span key={i} className="intro-letter inline-block" style={{ animationDelay: `${450 + i * 35}ms` }}>
+            {ch === " " ? "\u00a0" : ch}
+          </span>
+        ))}
+      </p>
+      <p className="intro-sub relative mt-3 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted">
+        University of Sargodha · CS Department
+      </p>
+
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-6 pb-6 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-muted sm:px-10 sm:pb-8">
+        <span>Loading your campus</span>
+        <span className="tabular-nums text-ink">{String(progress).padStart(3, "0")}</span>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-line">
+        <div className="h-full origin-left bg-accent transition-transform duration-150" style={{ transform: `scaleX(${progress / 100})` }} />
       </div>
     </div>
+  );
+}
+
+/** A hand-drawn stroke under a word, drawn after its headline line reveals (sits below descenders). */
+export function Swoosh({ children }: { children: ReactNode }) {
+  return (
+    <span className="fx-swoosh">
+      {children}
+      <svg viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden>
+        <path d="M4 15 C 70 5, 150 4, 220 10 S 285 18, 296 9" pathLength={1} />
+      </svg>
+    </span>
   );
 }
 

@@ -301,7 +301,7 @@ function Constellation({ clubs, animate, compact, dark }: { clubs: SceneClub[]; 
   const glow = useGlowTexture();
   const marks = useSectionMarks();
   const live = useRef<Live>({ ...KEYFRAMES.hero });
-  const [labels, setLabels] = useState(true);
+  const [labels, setLabels] = useState(false); // hidden until a section asks for them (avoids a first-frame flash)
 
   const nodes = useMemo(() => layoutNodes(clubs, pal.nodeLightness), [clubs, pal]);
   const hub = useMemo(() => new THREE.Vector3(0, 0, 0), []);
