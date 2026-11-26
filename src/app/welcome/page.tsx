@@ -6,6 +6,7 @@ import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
 import { HeroScene, PhysicsStage } from "@/components/landing/hero-scene";
 import { IntroLoader, MarkerRow, RevealLines, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
+import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { ClubMark } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -102,9 +103,10 @@ export default async function WelcomePage() {
           </div>
         </section>
 
-        <section data-scene="intro" className="relative">
+        <section data-scene="intro" className="relative overflow-hidden">
+          {/* Ribbon spans the whole section, behind the text */}
+          <ScrollArc className="absolute inset-0 h-full w-full text-accent opacity-90" />
           <div className="relative mx-auto max-w-[1240px] px-5 pb-28 pt-24 sm:px-8 lg:pt-32">
-            <ScrollArc className="absolute -left-10 -top-6 hidden h-[420px] w-[420px] text-accent md:block" />
             <RevealLines
               as="h1"
               lines={["Every club,", "notice and event.", "Connected."]}
@@ -215,9 +217,9 @@ export default async function WelcomePage() {
                 <Image src="/landing/app-mobile-dark.png" alt="Campus Connect club feed on a phone in dark mode" width={780} height={1688} sizes="240px" className="hidden h-auto w-full rounded-[22px] dark:block" />
               </div>
             </Reveal>
-            <div className="mt-24 grid gap-x-16 gap-y-12 md:grid-cols-2">
-              {FEATURES.map(({ icon: Icon, title, body }, i) => (
-                <Reveal key={title} delay={(i % 2) * 100} className="flex gap-5">
+            <StaggerReveal className="mt-24 grid gap-x-16 gap-y-12 md:grid-cols-2">
+              {FEATURES.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex gap-5">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
                     <Icon size={20} />
                   </span>
@@ -225,9 +227,9 @@ export default async function WelcomePage() {
                     <h3 className="text-xl font-semibold">{title}</h3>
                     <p className="mt-2 leading-relaxed text-ink/60">{body}</p>
                   </div>
-                </Reveal>
+                </li>
               ))}
-            </div>
+            </StaggerReveal>
           </div>
         </section>
 
@@ -272,15 +274,25 @@ export default async function WelcomePage() {
                 Missing one? Request a club <ArrowRight size={16} />
               </Link>
             </Reveal>
-            <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <StaggerReveal className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {clubs.map((c) => (
-                <li key={c.slug} className="flex gap-4 rounded-xl border border-ink/10 bg-paper/70 p-6 backdrop-blur-md">
-                  <ClubMark name={c.name} slug={c.slug} size="md" />
-                  <div className="min-w-0">
-                    <h3 className="font-semibold">{c.name}</h3>
-                    <p className="mt-0.5 font-mono text-xs text-ink/50">{c.members} members</p>
-                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{c.description}</p>
-                  </div>
+                <li key={c.slug}>
+                  <Link
+                    href={`/welcome/clubs/${c.slug}`}
+                    className="group relative flex h-full gap-4 rounded-xl border border-ink/10 bg-paper/70 p-6 backdrop-blur-md transition-[transform,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent/60 hover:shadow-[0_18px_40px_-24px_rgba(20,20,30,0.35)] focus-visible:-translate-y-1 focus-visible:border-accent/60 motion-reduce:hover:translate-y-0"
+                  >
+                    <ClubMark name={c.name} slug={c.slug} size="md" />
+                    <div className="min-w-0 pr-6">
+                      <h3 className="font-semibold">{c.name}</h3>
+                      <p className="mt-0.5 font-mono text-xs text-ink/50">{c.members} members</p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{c.description}</p>
+                    </div>
+                    <ArrowRight
+                      size={18}
+                      aria-hidden
+                      className="absolute right-5 top-6 -translate-x-2 text-accent opacity-0 transition-[transform,opacity] duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
+                    />
+                  </Link>
                 </li>
               ))}
               <li>
@@ -289,7 +301,7 @@ export default async function WelcomePage() {
                   <span className="text-sm text-ink/60">Suggest it in a minute. Department admins review every request.</span>
                 </Link>
               </li>
-            </ul>
+            </StaggerReveal>
           </div>
         </section>
 
@@ -305,8 +317,7 @@ export default async function WelcomePage() {
                   PostgreSQL and Three.js.
                 </p>
               </Reveal>
-              <Reveal delay={100}>
-                <ul className="mt-10 grid grid-cols-2 gap-3">
+              <StaggerReveal className="mt-10 grid grid-cols-2 gap-3">
                   {TEAM.map((name) => (
                     <li key={name} className="flex items-center gap-4 rounded-xl border border-ink/10 bg-paper/70 p-4 backdrop-blur-md">
                       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ink text-base font-medium text-paper">
@@ -315,8 +326,7 @@ export default async function WelcomePage() {
                       <span className="font-medium">{name}</span>
                     </li>
                   ))}
-                </ul>
-              </Reveal>
+              </StaggerReveal>
             </div>
           </div>
         </section>

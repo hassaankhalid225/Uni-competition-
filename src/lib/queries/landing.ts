@@ -1,6 +1,6 @@
 import "server-only";
-import { asc, count, eq, gte, sql } from "drizzle-orm";
-import { db, clubs, events, posts, users } from "@/lib/db";
+import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
+import { db, clubModerators, clubs, events, posts, users } from "@/lib/db";
 
 /** Real numbers for the landing page, read live from the database. */
 export async function getLandingStats() {
@@ -24,4 +24,42 @@ export async function getLandingClubs() {
     .from(clubs)
     .orderBy(asc(clubs.name))
     .limit(12);
+}
+
+const PUBLIC_RECENT_POSTS = 5;
+
+/** Public club profile for the landing page. Counts only; no member identities beyond moderators. */
+export async function getPublicClub(slug: string) {
+  const [club] = await db
+    .select({
+      id: clubs.id,
+      slug: clubs.slug,
+      name: clubs.name,
+      description: clubs.description,
+      createdAt: clubs.createdAt,
+      memberCount: sql<number>`(select count(*) from club_members cm where cm.club_id = "clubs"."id")::int`,
+      postCount: sql<number>`(select count(*) from posts p where p.club_id = "clubs"."id")::int`,
+    })
+    .from(clubs)
+    .where(eq(clubs.slug, slug));
+  if (!club) return null;
+
+  const [moderators, recentPosts] = await Promise.all([
+    db
+      .select({ name: users.name })
+      .from(clubModerators)
+      .innerJoin(users, eq(users.id, clubModerators.userId))
+      .where(eq(clubModerators.clubId, club.id))
+      .orderBy(asc(users.name)),
+    // Titles only: post bodies stay behind sign-in.
+    db
+      .select({ id: posts.id, title: posts.title, isPinned: posts.isPinned, createdAt: posts.createdAt, author: users.name })
+      .from(posts)
+      .innerJoin(users, eq(users.id, posts.authorId))
+      .where(eq(posts.clubId, club.id))
+      .orderBy(desc(posts.createdAt))
+      .limit(PUBLIC_RECENT_POSTS),
+  ]);
+
+  return { ...club, moderators: moderators.map((m) => m.name), recentPosts };
 }
