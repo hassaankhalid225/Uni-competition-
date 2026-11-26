@@ -1,15 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useRef } from "react";
 import { login } from "@/actions/auth";
 import { initialActionState } from "@/lib/action-result";
 import { FormMessage, SubmitButton, TextField } from "@/components/forms";
+import { PasswordField } from "@/components/auth/password-field";
+import { authInput, authSubmit } from "@/components/auth/auth-heading";
 
 const DEMO_ACCOUNTS = [
-  { label: "HOD (admin)", email: "hod@campus.test" },
-  { label: "Head CR (admin)", email: "headcr@campus.test" },
-  { label: "Moderator", email: "moderator@campus.test" },
-  { label: "Student", email: "student@campus.test" },
+  { label: "HOD", role: "Admin", email: "hod@campus.test" },
+  { label: "Head CR", role: "Admin", email: "headcr@campus.test" },
+  { label: "Hamza", role: "Moderator", email: "moderator@campus.test" },
+  { label: "Ayesha", role: "Student", email: "student@campus.test" },
 ];
 
 export function LoginForm() {
@@ -20,32 +23,42 @@ export function LoginForm() {
     const form = formRef.current;
     if (!form) return;
     (form.elements.namedItem("email") as HTMLInputElement).value = email;
-    (form.elements.namedItem("password") as HTMLInputElement).value = "campus123";
+    const pw = form.elements.namedItem("password") as HTMLInputElement;
+    // Update the controlled password field through the native setter so React sees the change.
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(pw, "campus123");
+    pw.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   return (
     <>
-      <form ref={formRef} action={action} className="flex flex-col gap-4" noValidate>
+      <form ref={formRef} action={action} className="flex flex-col gap-5" noValidate>
         <FormMessage state={state} />
-        <TextField name="email" label="University email" type="email" autoComplete="email" required state={state} />
-        <TextField name="password" label="Password" type="password" autoComplete="current-password" required state={state} />
-        <SubmitButton pendingLabel="Signing in…" className="mt-2 w-full">
+        <TextField name="email" label="Email" type="email" autoComplete="email" required state={state} inputClassName={authInput} />
+        <div className="flex flex-col gap-2">
+          <PasswordField autoComplete="current-password" state={state} />
+          <Link href="/forgot-password" className="self-end text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+        <SubmitButton pendingLabel="Signing in…" className={authSubmit}>
           Sign in
         </SubmitButton>
       </form>
 
-      <div className="mt-8 rounded-xl border border-line bg-surface p-4">
-        <p className="text-sm font-medium">Demo accounts</p>
-        <p className="mt-0.5 text-xs text-ink-muted">Sample data for evaluation. Password: campus123</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-10">
+        <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-muted">
+          <span className="h-px flex-1 bg-line" /> Demo accounts · password campus123 <span className="h-px flex-1 bg-line" />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
           {DEMO_ACCOUNTS.map((a) => (
             <button
               key={a.email}
               type="button"
               onClick={() => fill(a.email)}
-              className="rounded-lg border border-line px-2.5 py-2 text-left text-xs text-ink-soft transition-colors hover:border-accent hover:text-ink"
+              className="flex items-center justify-between rounded-full border border-line-strong px-4 py-2.5 text-left text-sm transition-colors hover:border-accent hover:bg-accent-soft"
             >
-              {a.label}
+              <span className="font-medium">{a.label}</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-muted">{a.role}</span>
             </button>
           ))}
         </div>

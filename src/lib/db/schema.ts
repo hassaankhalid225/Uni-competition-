@@ -29,13 +29,15 @@ const timestamps = {
 };
 
 // ── Users ────────────────────────────────────────────────────────────────────
-// Platform role is either student or admin. Admins carry a title (Head CR, Head GR, HOD) but
-// all titles share identical access. Moderation is club-scoped (see clubModerators).
+// Sign-in is handled by Supabase Auth; `id` is the Supabase auth user id. This table holds the
+// profile and the platform role (student or admin). Admins carry a title (Head CR, Head GR, HOD)
+// but all titles share identical access. Moderation is club-scoped (see clubModerators).
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  // Legacy column from the first version's own password auth; unused with Supabase.
+  passwordHash: text("password_hash"),
   role: userRole("role").notNull().default("student"),
   adminTitle: text("admin_title"),
   ...timestamps,

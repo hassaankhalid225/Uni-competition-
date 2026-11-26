@@ -1,18 +1,24 @@
 import Link from "next/link";
+import { AuthHeading } from "@/components/auth/auth-heading";
 import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Sign in" };
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
+  const { error } = await searchParams;
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold">Welcome back</h1>
-      <p className="mb-8 mt-2 text-sm text-ink-muted">
-        New here?{" "}
-        <Link href="/register" className="font-medium text-accent underline-offset-2 hover:underline">
-          Create a student account
+      <AuthHeading eyebrow="Sign in" title="Welcome back.">
+        New to Campus Connect?{" "}
+        <Link href="/register" className="font-medium text-accent underline-offset-4 hover:underline">
+          Create an account
         </Link>
-      </p>
+      </AuthHeading>
+      {error === "link" && (
+        <p role="alert" className="mb-5 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+          That link is invalid or has expired. Please try again.
+        </p>
+      )}
       <LoginForm />
     </>
   );
