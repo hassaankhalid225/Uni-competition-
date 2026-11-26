@@ -26,6 +26,17 @@ export const registerSchema = z.object({
   password: z.string().min(8, "At least 8 characters").max(100),
 });
 
+export const emailSchema = z.object({
+  email: z.email("Enter a valid email").trim().toLowerCase(),
+});
+
+export const newPasswordSchema = z
+  .object({
+    password: z.string().min(8, "At least 8 characters").max(100),
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "Passwords don't match" });
+
 export const loginSchema = z.object({
   email: z.email("Enter a valid email").trim().toLowerCase(),
   password: z.string().min(1, "Enter your password"),

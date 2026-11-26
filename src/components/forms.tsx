@@ -51,7 +51,7 @@ function FieldShell({ name, label, hint, state, className, children }: FieldProp
   );
 }
 
-export function TextField({ name, label, hint, state, className, ...input }: FieldProps & ComponentProps<"input">) {
+export function TextField({ name, label, hint, state, className, inputClassName, ...input }: FieldProps & ComponentProps<"input"> & { inputClassName?: string }) {
   const invalid = Boolean(state?.fieldErrors?.[name]?.length);
   return (
     <FieldShell name={name} label={label} hint={hint} state={state} className={className}>
@@ -60,7 +60,7 @@ export function TextField({ name, label, hint, state, className, ...input }: Fie
         name={name}
         aria-invalid={invalid}
         aria-describedby={invalid ? `${name}-error` : undefined}
-        className={cx(inputClass, "h-10", input.type === "file" && "h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-sunken file:px-3 file:py-1 file:text-sm file:text-ink")}
+        className={cx(inputClass, "h-10", input.type === "file" && "h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-sunken file:px-3 file:py-1 file:text-sm file:text-ink", inputClassName)}
         {...input}
       />
     </FieldShell>

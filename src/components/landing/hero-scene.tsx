@@ -14,6 +14,6 @@ export function HeroScene({ clubs }: { clubs: SceneClub[] }) {
   return <ConstellationScene clubs={clubs} />;
 }
 
-export function PhysicsStage() {
-  return <PhysicsStageScene />;
+export function PhysicsStage(props: { distance?: number; offsetY?: number }) {
+  return <PhysicsStageScene {...props} />;
 }

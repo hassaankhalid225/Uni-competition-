@@ -148,7 +148,8 @@ function Pieces({ count, animate, hovering }: { count: number; animate: boolean;
   );
 }
 
-export default function PhysicsStage() {
+/** `distance`: camera distance on desktop; larger shows the pile smaller (tall cards need more). */
+export default function PhysicsStage({ distance = 15, offsetY = 0 }: { distance?: number; offsetY?: number }) {
   const container = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const [compact, setCompact] = useState(false);
@@ -187,7 +188,7 @@ export default function PhysicsStage() {
       <Canvas
         frameloop={visible ? "always" : "never"}
         dpr={[1, compact ? 1.5 : 1.75]}
-        camera={{ position: [0, 0, compact ? 22 : 15], fov: 35 }}
+        camera={{ position: [0, offsetY, compact ? 22 : distance], fov: 35 }}
         gl={{ antialias: true, alpha: true }}
         fallback={<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(210,100,58,0.35),transparent_60%)]" />}
       >
