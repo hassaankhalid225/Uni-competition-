@@ -9,6 +9,7 @@ import { ClubMark } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { SubSocietyIcon } from "@/components/sub-society-icon";
+import { BrandMark } from "@/components/brand-mark";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -40,10 +41,7 @@ export default async function PublicClubPage({ params }: Props) {
       <header>
         <nav aria-label="Primary" className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-5 sm:px-8">
           <Link href="/welcome" className="flex items-center gap-2.5">
-            <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-paper">
-              <span className="font-display text-lg font-bold">C</span>
-              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-paper" />
-            </span>
+            <BrandMark size={36} />
             <span className="text-lg font-medium tracking-[-0.02em]">Campus Connect</span>
           </Link>
           <div className="flex items-center gap-2">

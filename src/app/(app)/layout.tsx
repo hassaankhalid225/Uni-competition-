@@ -6,6 +6,7 @@ import { logout } from "@/actions/auth";
 import { SidebarLink, TabLink } from "@/components/nav-link";
 import { Avatar, Badge, ClubMark } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
 
 const NAV = [
   { href: "/", label: "Home", icon: Home },
@@ -25,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line px-4 py-6 lg:flex">
         <Link href="/" className="mb-8 flex items-center gap-2.5 px-2">
-          <Logo />
+          <BrandMark />
           <span className="font-display text-xl font-semibold">Campus Connect</span>
         </Link>
         <nav aria-label="Main" className="flex flex-col gap-1">
@@ -83,7 +84,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {/* Mobile top bar */}
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-paper/90 px-4 py-3 backdrop-blur lg:hidden">
           <Link href="/" className="flex items-center gap-2">
-            <Logo />
+            <BrandMark />
             <span className="font-display text-lg font-semibold">Campus Connect</span>
           </Link>
           <div className="flex items-center gap-1">
@@ -117,11 +118,3 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   );
 }
 
-function Logo() {
-  return (
-    <span aria-hidden className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-paper">
-      <span className="font-display text-base font-bold leading-none">C</span>
-      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-paper" />
-    </span>
-  );
-}
