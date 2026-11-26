@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { getDatabaseUrl } from "./url";
 import * as s from "./schema";
 
 const DEMO_PASSWORD = "campus123";
@@ -18,8 +19,7 @@ function pkt(days: number, hh: number, mm = 0) {
 }
 
 async function main() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL is not set");
+  const url = getDatabaseUrl();
   const client = postgres(url, { max: 1, prepare: false });
   const db = drizzle(client, { schema: s });
 
