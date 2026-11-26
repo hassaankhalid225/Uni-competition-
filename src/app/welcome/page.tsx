@@ -292,8 +292,13 @@ export default async function WelcomePage() {
                       <p className="mt-0.5 font-mono text-xs text-ink/50">{c.members} members</p>
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{c.description}</p>
                       {c.wings.length > 0 && (
-                        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/55">
-                          {[`${c.wings.length} wings`, ...c.wings.map((f) => SUB_SOCIETY_SHORT_LABEL[f])].join(" · ")}
+                        <p className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-ink/60">
+                          <span className="mr-1 text-accent">{c.wings.length} wings</span>
+                          {c.wings.map((f) => (
+                            <span key={f} className="rounded-full border border-ink/10 px-2 py-0.5">
+                              {SUB_SOCIETY_SHORT_LABEL[f]}
+                            </span>
+                          ))}
                         </p>
                       )}
                     </div>
