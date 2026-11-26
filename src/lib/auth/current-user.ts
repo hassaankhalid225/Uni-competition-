@@ -24,10 +24,10 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   return user ?? null;
 });
 
-/** For pages: redirect to /login when signed out. */
+/** For pages: send signed-out visitors to the landing page (which links to sign in). */
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/welcome");
   return user;
 }
 

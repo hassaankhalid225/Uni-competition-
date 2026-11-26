@@ -4,7 +4,9 @@ A community platform for **CS Department students**: topic-based clubs with thei
 discussion feeds, official departmental announcements, and an event calendar, with role-based
 access for **Admins** (Head CR, Head GR, HOD), **club Moderators** and **Students**.
 
-Built for the Campus Connect Webathon (`brief/`).
+Built for the Campus Connect Webathon, Department of Computer Science, **University of Sargodha** (`brief/`).
+
+**Team:** Hassaan Khalid · Usman Shoukat · Yumna Aziz · Hamna
 
 ## Features
 
@@ -17,6 +19,7 @@ Built for the Campus Connect Webathon (`brief/`).
 | Announcements | Admins publish text + link + attachment; publication date/time shown |
 | Events | Upcoming / Past tabs; admins create, edit, cancel/restore (title, description, date, time, venue) |
 | Home | One screen: latest official announcements, posts from my clubs, upcoming events |
+| Landing page | `/welcome`: interactive 3D constellation of the department hub and its clubs (Three.js), live platform counts, product preview, roles, team credits |
 | Responsive | Sidebar layout on desktop, bottom tab bar on mobile; light & dark themes |
 
 ## Roles & access control
@@ -63,6 +66,8 @@ npm run dev                       # http://localhost:3000
 ```
 
 `npm run db:seed` resets the database to the demo state at any time.
+If your network blocks Postgres port 5432 (common on campus Wi-Fi), use `npm run db:setup:http`
+with a Neon URL instead: it runs the same migrations and seed over HTTPS.
 
 ### Demo accounts (fictional sample data, password `campus123`)
 
