@@ -6,7 +6,7 @@ import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import postgres from "postgres";
 import { getDatabaseUrl } from "./url";
 import * as s from "./schema";
-import { supabaseUserResolver } from "./seed-auth";
+import bcrypt from "bcryptjs";
 
 const DEMO_PASSWORD = "campus123";
 const HOUR = 3600_000;
@@ -39,14 +39,11 @@ export async function seedDatabase(db: AnyPgDb) {
     { key: "hira", name: "Hira Shah", email: "hira@campus.test", role: "student", adminTitle: null },
   ] as const;
 
-  // Each demo profile shares its id with the matching Supabase Auth account.
-  const resolve = supabaseUserResolver();
-  if (!resolve) console.warn("Supabase env not set: demo profiles get random ids and cannot sign in.");
-  const ids: string[] = [];
-  for (const p of people) ids.push(resolve ? await resolve(p.email, DEMO_PASSWORD, p.name) : crypto.randomUUID());
+  // Demo accounts sign in with email + password against our own database.
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   const insertedUsers = await db
     .insert(s.users)
-    .values(people.map((p, i) => ({ id: ids[i], name: p.name, email: p.email, role: p.role, adminTitle: p.adminTitle })))
+    .values(people.map((p) => ({ name: p.name, email: p.email, role: p.role, adminTitle: p.adminTitle, passwordHash })))
     .returning({ id: s.users.id, email: s.users.email });
   const u = Object.fromEntries(people.map((p) => [p.key, insertedUsers.find((x) => x.email === p.email)!.id])) as Record<
     (typeof people)[number]["key"],

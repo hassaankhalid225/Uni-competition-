@@ -32,14 +32,14 @@ const timestamps = {
 };
 
 // ── Users ────────────────────────────────────────────────────────────────────
-// Sign-in is handled by Supabase Auth; `id` is the Supabase auth user id. This table holds the
-// profile and the platform role (student or admin). Admins carry a title (Head CR, Head GR, HOD)
+// Email + password accounts store a bcrypt hash here; Google accounts (via Supabase OAuth) have
+// no password and are linked by email. The platform role is student or admin. Admins carry a title (Head CR, Head GR, HOD)
 // but all titles share identical access. Moderation is club-scoped (see clubModerators).
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  // Legacy column from the first version's own password auth; unused with Supabase.
+  // bcrypt hash for email + password sign-in; null for Google-only accounts.
   passwordHash: text("password_hash"),
   role: userRole("role").notNull().default("student"),
   adminTitle: text("admin_title"),
