@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, Megaphone, MessagesSquare, ShieldCheck } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
-import { HeroScene, PhysicsStage } from "@/components/landing/hero-scene";
+import { CampusDiorama, HeroScene } from "@/components/landing/hero-scene";
 import { WingsDeck } from "@/components/landing/wings-deck";
 import { IntroLoader, MarkerRow, RevealLines, ScatterWord, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
@@ -87,24 +87,69 @@ export default async function WelcomePage() {
       </header>
 
       <main className="relative z-10">
-        {/* ── 1. Hero: interactive 3D stage + headline ─────────────────── */}
-        <section data-scene="hero" className="relative">
-          <div className="px-3 pt-20 sm:px-5 sm:pt-24">
-            <div className="relative h-[64dvh] overflow-hidden rounded-[28px] bg-night sm:h-[74dvh] dark:bg-[#22252c]">
-              {/* Server-rendered still of the pile: visible before any JS loads, hidden once the live scene is ready. */}
-              <picture className="stage-poster pointer-events-none absolute inset-0 transition-opacity duration-700">
-                <source media="(max-width: 767px)" srcSet="/landing/stage-poster-mobile.webp" />
-                <img src="/landing/stage-poster-desktop.webp" alt="" fetchPriority="high" className="h-full w-full object-cover" />
-              </picture>
-              <PhysicsStage />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-5 font-mono text-[11px] uppercase tracking-[0.18em] text-snow/70 sm:p-7">
-                <span>University of Sargodha<br />Department of Computer Science</span>
-                <span className="hidden text-right sm:block">Move your cursor<br />through the pile</span>
+        {/* ── 1. Hero: headline + interactive 3D campus ─────────────────── */}
+        <section data-scene="hero" className="relative overflow-hidden">
+          {/* Soft backdrop: warm glow + faint blueprint grid */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_68%_48%,color-mix(in_oklab,var(--accent)_14%,transparent),transparent_70%)]" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_50%,black,transparent_75%)]" />
+
+          {/* The campus: every pavilion is a real club; hover to meet it, click to open it.
+              Full-bleed on the right so the island is never cropped; edges fade softly. */}
+          <div className="relative mt-20 h-[48vh] min-h-[320px] lg:mt-0 [mask-image:radial-gradient(ellipse_80%_75%_at_50%_50%,black_62%,transparent_100%)] lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[64%]">
+            {/* Light-mode still shown before the 3D loads (dark mode simply waits for the scene) */}
+            <picture className="stage-poster pointer-events-none absolute inset-0 transition-opacity duration-700 dark:hidden">
+              <source media="(max-width: 767px)" srcSet="/landing/campus-poster-mobile.webp" />
+              <img src="/landing/campus-poster-desktop.webp" alt="" fetchPriority="high" className="h-full w-full object-cover" />
+            </picture>
+            <CampusDiorama clubs={clubs.map((c) => ({ name: c.name, slug: c.slug, members: c.members }))} />
+          </div>
+          <div className="pointer-events-none absolute bottom-16 right-[32%] hidden translate-x-1/2 items-center gap-4 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.16em] text-ink/55 lg:flex">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-accent" /> Department</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#9aa8cf]" /> Clubs · hover to meet</span>
+            <span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-accent" /> Announcements</span>
+          </div>
+
+          <div className="relative mx-auto grid max-w-[1400px] items-center px-5 pb-10 pt-6 sm:px-8 lg:min-h-dvh lg:grid-cols-[1fr_1.2fr] lg:pb-16 lg:pt-24 lg:pointer-events-none">
+            <div className="relative z-10 max-w-xl lg:pointer-events-auto">
+              <p className={`hero-rise ${eyebrow}`}>University of Sargodha · Department of Computer Science</p>
+              <RevealLines
+                as="h1"
+                lines={["Your department,", <>on one <span key="c" className="fx-underline">campus.</span></>]}
+                className="mt-5 text-[2.8rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-6xl xl:text-[4.6rem]"
+              />
+              <p className="hero-rise mt-6 max-w-md text-lg leading-relaxed text-ink/70" style={{ animationDelay: "200ms" }}>
+                Every club, every official notice and every department event, connected in one place built for CS students.
+              </p>
+              <div className="hero-rise mt-8 flex flex-wrap gap-3" style={{ animationDelay: "300ms" }}>
+                <Link href={primaryCta.href} className={`${pill} bg-accent text-accent-ink hover:bg-ink hover:text-paper`}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" /> {primaryCta.label}
+                </Link>
+                {!user && (
+                  <Link href="/login" className={`${pill} border border-ink/20 hover:bg-ink hover:text-paper`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" /> Sign in
+                  </Link>
+                )}
               </div>
+              <dl className="hero-rise mt-12 grid max-w-md grid-cols-4 gap-4 border-t border-ink/15 pt-6" style={{ animationDelay: "400ms" }}>
+                {[
+                  [stats.clubs, "clubs"],
+                  [stats.students, "students"],
+                  [stats.discussions, "discussions"],
+                  [stats.upcomingEvents, "upcoming events"],
+                ].map(([value, label]) => (
+                  <div key={label}>
+                    <dt className="sr-only">{label}</dt>
+                    <dd className="text-3xl font-normal tracking-[-0.03em] tabular-nums">{value}</dd>
+                    <dd className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/55">{label}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/40">Live counts from the platform</p>
             </div>
-            <div className="px-2 pt-4 sm:px-3">
-              <MarkerRow label="Scroll to explore" />
-            </div>
+
+          </div>
+          <div className="relative mx-auto max-w-[1400px] px-5 pb-6 sm:px-8">
+            <MarkerRow label="Scroll to explore" />
           </div>
         </section>
 
@@ -113,45 +158,15 @@ export default async function WelcomePage() {
           <ScrollArc className="absolute inset-0 h-full w-full text-accent opacity-90" />
           <div className="relative mx-auto max-w-[1240px] px-5 pb-28 pt-24 sm:px-8 lg:pt-32">
             <RevealLines
-              as="h1"
               lines={["Every club,", "notice and event.", <>Get <span key="c" className="fx-underline">connected.</span></>]}
               className="relative text-[3.2rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-7xl lg:ml-[16%] lg:text-[8.5rem]"
             />
-            <div className="relative mt-14 grid gap-10 lg:ml-[46%]">
-              <Reveal>
-                <p className="max-w-md text-lg leading-relaxed text-ink/70">
-                  Campus Connect is the CS department&apos;s own community: club discussions, official announcements from the
-                  Head CR, Head GR and HOD, and the event calendar, in one place.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href={primaryCta.href} className={`${pill} bg-accent text-accent-ink hover:bg-ink hover:text-paper`}>
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" /> {primaryCta.label}
-                  </Link>
-                  {!user && (
-                    <Link href="/login" className={`${pill} border border-ink/20 hover:bg-ink hover:text-paper`}>
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" /> Sign in
-                    </Link>
-                  )}
-                </div>
-              </Reveal>
-              <Reveal delay={120}>
-                <dl className="grid max-w-md grid-cols-4 gap-4 border-t border-ink/15 pt-6">
-                  {[
-                    [stats.clubs, "clubs"],
-                    [stats.students, "students"],
-                    [stats.discussions, "discussions"],
-                    [stats.upcomingEvents, "upcoming events"],
-                  ].map(([value, label]) => (
-                    <div key={label}>
-                      <dt className="sr-only">{label}</dt>
-                      <dd className="text-3xl font-normal tracking-[-0.03em] tabular-nums">{value}</dd>
-                      <dd className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/55">{label}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/40">Live counts from the platform</p>
-              </Reveal>
-            </div>
+            <Reveal className="relative mt-14 lg:ml-[46%]">
+              <p className="max-w-md text-lg leading-relaxed text-ink/70">
+                Campus Connect is the CS department&apos;s own community: club discussions, official announcements from the
+                Head CR, Head GR and HOD, and the event calendar, in one place.
+              </p>
+            </Reveal>
           </div>
         </section>
 

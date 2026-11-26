@@ -6,6 +6,7 @@ import type { SceneClub } from "./constellation-scene";
 
 // three.js only runs in the browser and is heavy, so both scenes are loaded lazily on the client.
 const ConstellationScene = dynamic(() => import("./constellation-scene"), { ssr: false });
+const CampusDioramaScene = dynamic(() => import("./campus-diorama"), { ssr: false });
 const PhysicsStageScene = dynamic(() => import("./physics-stage"), {
   ssr: false,
   loading: () => <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(210,100,58,0.3),transparent_60%)]" />,
@@ -31,4 +32,8 @@ export function HeroScene({ clubs }: { clubs: SceneClub[] }) {
 
 export function PhysicsStage(props: { distance?: number; offsetY?: number; poster?: { desktop: string; mobile: string } }) {
   return <PhysicsStageScene {...props} />;
+}
+
+export function CampusDiorama(props: { clubs: { name: string; slug: string; members: number }[] }) {
+  return <CampusDioramaScene {...props} />;
 }
