@@ -101,7 +101,10 @@ export function RevealLines({ lines, as: Tag = "h2", className = "" }: { lines: 
   );
 }
 
-/** A curved accent line that draws itself as its section scrolls through the viewport. */
+/**
+ * A long ribbon that draws itself across its whole section as you scroll: it enters at the top
+ * left, sweeps behind the headline and leaves at the bottom right, finishing as the section ends.
+ */
 export function ScrollArc({ className = "" }: { className?: string }) {
   const ref = useRef<SVGPathElement>(null);
   useEffect(() => {
@@ -115,7 +118,9 @@ export function ScrollArc({ className = "" }: { className?: string }) {
     let frame = 0;
     const update = () => {
       const r = host.getBoundingClientRect();
-      const t = Math.min(Math.max((window.innerHeight - r.top) / (window.innerHeight + r.height * 0.4), 0), 1);
+      const vh = window.innerHeight;
+      // 0 when the section's top enters the bottom of the screen, 1 when its end reaches mid-screen.
+      const t = Math.min(Math.max((vh - r.top) / (r.height + vh * 0.5), 0), 1);
       path.style.strokeDashoffset = String(1 - t);
       frame = requestAnimationFrame(update);
     };
@@ -123,12 +128,12 @@ export function ScrollArc({ className = "" }: { className?: string }) {
     return () => cancelAnimationFrame(frame);
   }, []);
   return (
-    <svg viewBox="0 0 600 600" fill="none" aria-hidden className={`pointer-events-none ${className}`}>
+    <svg viewBox="0 0 1440 1200" preserveAspectRatio="xMidYMin slice" fill="none" aria-hidden className={`pointer-events-none ${className}`}>
       <path
         ref={ref}
-        d="M -40 80 C 180 40, 360 160, 420 340 S 520 600, 560 640"
+        d="M -120 40 C 260 -10, 560 150, 600 420 S 380 880, 800 960 S 1380 780, 1600 1180"
         stroke="currentColor"
-        strokeWidth="28"
+        strokeWidth="26"
         strokeLinecap="round"
         pathLength={1}
         strokeDasharray="1"
