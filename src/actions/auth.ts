@@ -41,7 +41,7 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
   const passwordHash = await bcrypt.hash(password, 10);
   const [user] = await db.insert(users).values({ name, email, passwordHash }).returning({ id: users.id });
   await createSession(user.id);
-  redirect("/clubs?welcome=1");
+  redirect("/"); // new accounts start on Home (shows department posts until they join clubs)
 }
 
 export async function login(_prev: ActionState, formData: FormData): Promise<ActionState> {
