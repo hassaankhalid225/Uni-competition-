@@ -111,7 +111,7 @@ export const clubRequests = pgTable(
   (t) => [index("club_requests_status_idx").on(t.status, t.createdAt)],
 );
 
-// ── Attachments (stored in Postgres; ≤ 4 MB each) ───────────────────────────
+// ── Attachments (stored in Postgres; ≤ 3 MB each) ───────────────────────────
 export const attachments = pgTable("attachments", {
   id: uuid("id").primaryKey().defaultRandom(),
   uploadedBy: uuid("uploaded_by").references(() => users.id, { onDelete: "set null" }),

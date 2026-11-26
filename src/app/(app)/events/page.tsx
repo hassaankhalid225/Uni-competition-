@@ -58,7 +58,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
                   <form action={setEventStatus}>
                     <input type="hidden" name="id" value={e.id} />
                     <input type="hidden" name="status" value={e.status === "cancelled" ? "scheduled" : "cancelled"} />
-                    <SubmitButton variant={e.status === "cancelled" ? "secondary" : "danger"} size="sm" pendingLabel="Saving…">
+                    <SubmitButton variant={e.status === "cancelled" ? "secondary" : "danger"} size="sm" pendingLabel="Saving…" confirmMessage={e.status === "cancelled" ? undefined : "Cancel this event? Students will see it marked as cancelled."}>
                       {e.status === "cancelled" ? "Restore event" : "Cancel event"}
                     </SubmitButton>
                   </form>

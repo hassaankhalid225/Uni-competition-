@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, sql } from "drizzle-orm";
 import { db, clubModerators, clubs, events, posts, users, type SubSocietyFocus } from "@/lib/db";
 import { listClubSubSocieties } from "@/lib/queries/clubs";
 
@@ -9,7 +9,7 @@ export async function getLandingStats() {
     db.select({ n: count() }).from(clubs),
     db.select({ n: count() }).from(users).where(eq(users.role, "student")),
     db.select({ n: count() }).from(posts),
-    db.select({ n: count() }).from(events).where(gte(events.startsAt, new Date())),
+    db.select({ n: count() }).from(events).where(and(gte(events.startsAt, new Date()), eq(events.status, "scheduled"))),
   ]);
   return { clubs: c.n, students: s.n, discussions: p.n, upcomingEvents: e.n };
 }

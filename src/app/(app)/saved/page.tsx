@@ -18,7 +18,7 @@ export default async function SavedPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {posts.map((p) => (
-            <PostCard key={p.id} post={p} />
+            <PostCard key={p.id} post={p} isAdmin={user.role === "admin"} />
           ))}
         </div>
       )}

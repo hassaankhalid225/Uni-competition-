@@ -22,6 +22,8 @@ function viewerFields(viewerId: string) {
   return {
     myVote: sql<number>`coalesce((select v.value from post_votes v where v.post_id = "posts"."id" and v.user_id = ${viewerId}), 0)::int`,
     isBookmarked: sql<boolean>`exists(select 1 from bookmarks b where b.post_id = "posts"."id" and b.user_id = ${viewerId})`,
+    // Member or moderator of the post's club (admins are handled by the caller).
+    canParticipate: sql<boolean>`(exists(select 1 from club_members cm where cm.club_id = "posts"."club_id" and cm.user_id = ${viewerId}) or exists(select 1 from club_moderators m where m.club_id = "posts"."club_id" and m.user_id = ${viewerId}))`,
   };
 }
 

@@ -4,21 +4,24 @@ import { toggleBookmark, vote } from "@/actions/posts";
 import type { FeedPost } from "@/lib/queries/posts";
 import { formatBytes, timeAgo } from "@/lib/format";
 import { Badge, ClubMark, cx } from "./ui";
+import { PendingButton } from "./pending-button";
 
-export function VoteControl({ postId, score, myVote, orientation = "vertical" }: { postId: string; score: number; myVote: number; orientation?: "vertical" | "horizontal" }) {
+export function VoteControl({ postId, score, myVote, orientation = "vertical", canVote = true }: { postId: string; score: number; myVote: number; orientation?: "vertical" | "horizontal"; canVote?: boolean }) {
+  const lockedHint = canVote ? undefined : "Join this club to vote";
   return (
     <div className={cx("flex items-center", orientation === "vertical" ? "flex-col" : "flex-row gap-1")}>
       <form action={vote}>
         <input type="hidden" name="postId" value={postId} />
         <input type="hidden" name="value" value="1" />
-        <button
-          type="submit"
+        <PendingButton
+          disabled={!canVote}
+          title={lockedHint ?? "Upvote"}
           aria-label="Upvote"
           aria-pressed={myVote === 1}
           className={cx("rounded-md p-1 transition-colors hover:bg-accent-soft", myVote === 1 ? "text-accent" : "text-ink-muted hover:text-accent")}
         >
           <ArrowBigUp size={22} fill={myVote === 1 ? "currentColor" : "none"} />
-        </button>
+        </PendingButton>
       </form>
       <span className={cx("min-w-6 text-center font-mono text-sm font-medium tabular-nums", myVote === 1 && "text-accent", myVote === -1 && "text-ink-soft")} aria-label={`Score ${score}`}>
         {score}
@@ -26,14 +29,15 @@ export function VoteControl({ postId, score, myVote, orientation = "vertical" }:
       <form action={vote}>
         <input type="hidden" name="postId" value={postId} />
         <input type="hidden" name="value" value="-1" />
-        <button
-          type="submit"
+        <PendingButton
+          disabled={!canVote}
+          title={lockedHint ?? "Downvote"}
           aria-label="Downvote"
           aria-pressed={myVote === -1}
           className={cx("rounded-md p-1 transition-colors hover:bg-sunken", myVote === -1 ? "text-ink" : "text-ink-muted hover:text-ink")}
         >
           <ArrowBigDown size={22} fill={myVote === -1 ? "currentColor" : "none"} />
-        </button>
+        </PendingButton>
       </form>
     </div>
   );
@@ -43,14 +47,13 @@ export function BookmarkButton({ postId, isBookmarked }: { postId: string; isBoo
   return (
     <form action={toggleBookmark}>
       <input type="hidden" name="postId" value={postId} />
-      <button
-        type="submit"
+      <PendingButton
         aria-pressed={isBookmarked}
         className={cx("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-sunken", isBookmarked ? "text-accent" : "text-ink-muted hover:text-ink")}
       >
         {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
         {isBookmarked ? "Saved" : "Save"}
-      </button>
+      </PendingButton>
     </form>
   );
 }
@@ -85,11 +88,11 @@ export function LinkPreview({ url }: { url: string }) {
   );
 }
 
-export function PostCard({ post, showClub = true }: { post: FeedPost; showClub?: boolean }) {
+export function PostCard({ post, showClub = true, isAdmin = false }: { post: FeedPost; showClub?: boolean; isAdmin?: boolean }) {
   const isImage = post.attachmentType?.startsWith("image/");
   return (
     <article className="flex gap-3 rounded-xl border border-line bg-surface p-4 transition-colors hover:border-line-strong sm:gap-4 sm:p-5">
-      <VoteControl postId={post.id} score={post.score} myVote={post.myVote} />
+      <VoteControl postId={post.id} score={post.score} myVote={post.myVote} canVote={post.canParticipate || isAdmin} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-muted">
           {showClub && (

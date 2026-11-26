@@ -98,7 +98,7 @@ export default async function ClubPage({ params, searchParams }: PageProps<"/clu
         ) : (
           <div className="flex flex-col gap-3">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} showClub={false} />
+              <PostCard key={post.id} post={post} showClub={false} isAdmin={isAdmin} />
             ))}
           </div>
         )}

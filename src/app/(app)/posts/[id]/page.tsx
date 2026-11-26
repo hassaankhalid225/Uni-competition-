@@ -8,6 +8,7 @@ import { deleteComment, deletePost, togglePin } from "@/actions/posts";
 import { formatDateTime, timeAgo } from "@/lib/format";
 import { AttachmentLink, BookmarkButton, LinkPreview, VoteControl } from "@/components/post-card";
 import { SubmitButton } from "@/components/forms";
+import { PendingButton } from "@/components/pending-button";
 import { Avatar, Badge, ClubMark } from "@/components/ui";
 import { CommentForm, ReplyToggle } from "./comment-form";
 
@@ -34,7 +35,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
       </Link>
 
       <article className="flex gap-4 rounded-xl border border-line bg-surface p-5 sm:p-6">
-        <VoteControl postId={post.id} score={post.score} myVote={post.myVote} />
+        <VoteControl postId={post.id} score={post.score} myVote={post.myVote} canVote={canParticipate} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
             <Avatar name={post.authorName} src={post.authorAvatar} size="sm" />
@@ -80,7 +81,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
             {canDelete && (
               <form action={deletePost}>
                 <input type="hidden" name="postId" value={post.id} />
-                <SubmitButton variant="danger" size="sm" className="font-normal" pendingLabel="Deleting…">
+                <SubmitButton variant="danger" size="sm" className="font-normal" pendingLabel="Deleting…" confirmMessage="Delete this post and all its comments? This can't be undone.">
                   <Trash2 size={16} /> Delete{post.authorId !== user.id ? " (moderator)" : ""}
                 </SubmitButton>
               </form>
@@ -137,9 +138,12 @@ function Comment({ node, postId, user, canModerate, canParticipate, depth }: { n
             {canDelete && (
               <form action={deleteComment}>
                 <input type="hidden" name="commentId" value={node.id} />
-                <button type="submit" className="rounded-md px-1.5 py-0.5 text-xs font-medium text-ink-muted hover:bg-danger-soft hover:text-danger">
+                <PendingButton
+                  confirmMessage="Delete this comment and its replies?"
+                  className="rounded-md px-1.5 py-0.5 text-xs font-medium text-ink-muted hover:bg-danger-soft hover:text-danger"
+                >
                   Delete
-                </button>
+                </PendingButton>
               </form>
             )}
           </div>

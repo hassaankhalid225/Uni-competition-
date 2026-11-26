@@ -13,12 +13,16 @@ import { ButtonLink, EmptyState } from "@/components/ui";
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const user = await requireUser();
   const sort = parseSort((await searchParams).sort);
-  const [feed, announcements, upcoming, myClubs] = await Promise.all([
+  const [joinedFeed, announcements, upcoming, myClubs] = await Promise.all([
     listPosts({ viewerId: user.id, onlyJoinedClubs: true, sort, limit: 30 }),
     listAnnouncements(2),
     listUpcomingEvents(4),
     listMyClubs(user.id),
   ]);
+  // Never greet someone with an empty feed: until they join a club, show the whole department.
+  const discovering = myClubs.length === 0;
+  const feed = discovering ? await listPosts({ viewerId: user.id, sort: (await searchParams).sort ? sort : "top", limit: 30 }) : joinedFeed;
+  const isAdmin = user.role === "admin";
   const firstName = user.name.replace(/^Dr\.?\s+/i, "").split(" ")[0];
 
   return (
@@ -54,22 +58,24 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <section aria-labelledby="feed-heading">
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 id="feed-heading" className="font-display text-2xl font-semibold">
-              From your clubs
+              {discovering ? "Popular across the department" : "From your clubs"}
             </h2>
             <SortTabs basePath="/" current={sort} />
           </div>
-          {myClubs.length === 0 ? (
-            <EmptyState title="Your feed is quiet" action={<ButtonLink href="/clubs">Explore clubs</ButtonLink>}>
-              Join a club or two and their latest discussions will show up here.
-            </EmptyState>
-          ) : feed.length === 0 ? (
-            <EmptyState title="No posts yet" action={<ButtonLink href={`/clubs/${myClubs[0].slug}`}>Start a discussion</ButtonLink>}>
+          {discovering && (
+            <p className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink-soft">
+              You haven&apos;t joined any clubs yet. Join a few to vote, comment and personalise this feed.
+              <ButtonLink href="/clubs" size="sm">Explore clubs</ButtonLink>
+            </p>
+          )}
+          {feed.length === 0 ? (
+            <EmptyState title="No posts yet" action={<ButtonLink href={discovering ? "/clubs" : `/clubs/${myClubs[0].slug}`}>{discovering ? "Explore clubs" : "Start a discussion"}</ButtonLink>}>
               Your clubs haven&apos;t posted anything yet. Be the first.
             </EmptyState>
           ) : (
             <div className="flex flex-col gap-3">
               {feed.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} isAdmin={isAdmin} />
               ))}
             </div>
           )}

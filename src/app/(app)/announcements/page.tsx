@@ -37,7 +37,7 @@ export default async function AnnouncementsPage() {
                 {isAdmin && (
                   <form action={deleteAnnouncement} className="mt-4 flex justify-end border-t border-line pt-3">
                     <input type="hidden" name="id" value={a.id} />
-                    <SubmitButton variant="danger" size="sm" pendingLabel="Removing…">
+                    <SubmitButton variant="danger" size="sm" pendingLabel="Removing…" confirmMessage="Remove this announcement for everyone?">
                       <Trash2 size={14} /> Remove
                     </SubmitButton>
                   </form>

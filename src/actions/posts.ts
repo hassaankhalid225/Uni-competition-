@@ -86,7 +86,7 @@ export async function vote(formData: FormData) {
   const user = await signedInUser();
   const { postId, value } = voteSchema.parse(Object.fromEntries(formData));
   const post = await getPostOrThrow(postId);
-  if (!(await canParticipateInClub(user, post.clubId))) throw new ForbiddenError("Join this club to vote.");
+  if (!(await canParticipateInClub(user, post.clubId))) return; // UI disables voting for non-members
 
   const where = and(eq(postVotes.postId, postId), eq(postVotes.userId, user.id));
   const [existing] = await db.select({ value: postVotes.value }).from(postVotes).where(where);

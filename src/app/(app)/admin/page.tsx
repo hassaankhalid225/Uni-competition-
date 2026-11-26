@@ -6,6 +6,7 @@ import { removeModerator } from "@/actions/admin";
 import { timeAgo } from "@/lib/format";
 import { Avatar, Badge, ClubMark, EmptyState, PageHeader } from "@/components/ui";
 import { AssignModeratorForm, ReviewRequestForm } from "./admin-forms";
+import { PendingButton } from "@/components/pending-button";
 
 export const metadata = { title: "Admin console" };
 
@@ -109,9 +110,13 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
                       <form action={removeModerator}>
                         <input type="hidden" name="clubId" value={club.id} />
                         <input type="hidden" name="userId" value={m.id} />
-                        <button type="submit" aria-label={`Remove ${m.name} as moderator of ${club.name}`} className="rounded-md p-1 text-ink-muted hover:bg-danger-soft hover:text-danger">
+                        <PendingButton
+                          aria-label={`Remove ${m.name} as moderator of ${club.name}`}
+                          confirmMessage={`Remove ${m.name} as moderator of ${club.name}?`}
+                          className="rounded-md p-1 text-ink-muted hover:bg-danger-soft hover:text-danger"
+                        >
                           <X size={16} />
-                        </button>
+                        </PendingButton>
                       </form>
                     </li>
                   ))}

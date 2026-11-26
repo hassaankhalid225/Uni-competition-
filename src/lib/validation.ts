@@ -67,11 +67,22 @@ export const eventSchema = z.object({
   title: z.string().trim().min(3, "At least 3 characters").max(120),
   description: z.string().trim().min(3, "Add a short description").max(2_000),
   venue: z.string().trim().min(2, "Where is it happening?").max(120),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date"),
-  time: z.string().regex(/^\d{2}:\d{2}$/, "Pick a time"),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date")
+    .refine((v) => {
+      const [y, m, d] = v.split("-").map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      // Rejects impossible dates (e.g. 31 Feb) and absurd years.
+      return y >= 2020 && y <= 2100 && dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+    }, "Enter a real date between 2020 and 2100"),
+  time: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Pick a valid time (00:00–23:59)"),
 });
 
-export const MAX_ATTACHMENT_BYTES = 4 * 1024 * 1024;
+// Vercel caps request bodies at ~4.5 MB, so files stay safely below that.
+export const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 export const ALLOWED_ATTACHMENT_TYPES: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",

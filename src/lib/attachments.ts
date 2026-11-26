@@ -7,7 +7,7 @@ type SaveResult = { ok: true; id: string | null } | { ok: false; error: string }
 /** Validates and stores an optional uploaded file from a form. Returns its id (or null if none). */
 export async function saveAttachment(file: FormDataEntryValue | null, userId: string): Promise<SaveResult> {
   if (!(file instanceof File) || file.size === 0) return { ok: true, id: null };
-  if (file.size > MAX_ATTACHMENT_BYTES) return { ok: false, error: "File must be 4 MB or smaller." };
+  if (file.size > MAX_ATTACHMENT_BYTES) return { ok: false, error: "File must be 3 MB or smaller." };
   if (!ALLOWED_ATTACHMENT_TYPES[file.type])
     return { ok: false, error: "Allowed: images (PNG, JPG, WebP, GIF), PDF, TXT, DOCX, PPTX, ZIP." };
 
