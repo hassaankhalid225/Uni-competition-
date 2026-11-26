@@ -171,8 +171,9 @@ export function ScrollArc({ className = "" }: { className?: string }) {
     const update = () => {
       const r = host.getBoundingClientRect();
       const vh = window.innerHeight;
-      // 0 when the section's top enters the bottom of the screen, 1 when its end reaches mid-screen.
-      const t = Math.min(Math.max((vh - r.top) / (r.height + vh * 0.5), 0), 1);
+      // 0 when the section's top enters the screen; fully drawn (1) by the time the whole
+      // section is in view, so the ribbon never looks cut off.
+      const t = Math.min(Math.max((vh - r.top) / (r.height * 0.9), 0), 1);
       path.style.strokeDashoffset = String(1 - t);
       frame = requestAnimationFrame(update);
     };
@@ -183,12 +184,12 @@ export function ScrollArc({ className = "" }: { className?: string }) {
     <svg viewBox="0 0 1440 1200" preserveAspectRatio="xMidYMin slice" fill="none" aria-hidden className={`pointer-events-none ${className}`}>
       <path
         ref={ref}
-        d="M -120 40 C 260 -10, 560 150, 600 420 S 380 880, 800 960 S 1380 780, 1600 1180"
+        d="M -120 150 C 260 -60, 560 120, 720 300 S 1060 420, 1260 240 S 1480 40, 1640 90"
         stroke="currentColor"
         strokeWidth="26"
         strokeLinecap="round"
         pathLength={1}
-        strokeDasharray="1"
+        strokeDasharray="1 2"
         strokeDashoffset="1"
       />
     </svg>
