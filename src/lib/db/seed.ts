@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import postgres from "postgres";
 import { getDatabaseUrl } from "./url";
 import * as s from "./schema";
@@ -18,11 +19,10 @@ function pkt(days: number, hh: number, mm = 0) {
   return new Date(`${ymd}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00+05:00`);
 }
 
-async function main() {
-  const url = getDatabaseUrl();
-  const client = postgres(url, { max: 1, prepare: false });
-  const db = drizzle(client, { schema: s });
+type AnyPgDb = PgDatabase<PgQueryResultHKT, typeof s>;
 
+/** Wipes and refills every table. Shared by the TCP (this file) and HTTPS (seed-http.ts) runners. */
+export async function seedDatabase(db: AnyPgDb) {
   await db.execute(sql`truncate table
     bookmarks, post_votes, comments, posts, club_moderators, club_members, club_requests,
     announcements, events, clubs, attachments, users restart identity cascade`);
@@ -160,10 +160,16 @@ async function main() {
   ]);
 
   console.log(`Seeded. Demo password for every account: ${DEMO_PASSWORD}`);
+}
+
+async function main() {
+  const client = postgres(getDatabaseUrl(), { max: 1, prepare: false });
+  await seedDatabase(drizzle(client, { schema: s }) as unknown as AnyPgDb);
   await client.end();
 }
 
-main().catch((err) => {
+// Only run when executed directly (not when imported by seed-http.ts).
+if (process.argv[1]?.includes("seed.ts")) main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
