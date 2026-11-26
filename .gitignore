@@ -40,3 +40,4 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.db
+next-env.d.ts
