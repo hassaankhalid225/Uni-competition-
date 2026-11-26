@@ -10,15 +10,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f5f0" },
-    { media: "(prefers-color-scheme: dark)", color: "#16181d" },
-  ],
+  themeColor: "#f8f5f0",
 };
 
-// Runs before first paint: applies the saved theme (or the system's) so the page never flashes
-// the wrong colours. Kept tiny and dependency-free on purpose.
-const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("cc-theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})()`;
+// Runs before first paint: light by default for everyone (whatever the device setting);
+// a visitor's own choice from the theme toggle is remembered and wins.
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("cc-theme");document.documentElement.dataset.theme=t==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}})()`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
