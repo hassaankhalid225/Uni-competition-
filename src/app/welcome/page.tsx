@@ -11,6 +11,7 @@ import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { ClubMark } from "@/components/ui";
 import { SUB_SOCIETY_SHORT_LABEL } from "@/components/sub-society-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
 
 export const metadata = {
   title: "Campus Connect: CS Department, University of Sargodha",
@@ -67,10 +68,7 @@ export default async function WelcomePage() {
       <header className="absolute inset-x-0 top-0 z-30">
         <nav aria-label="Primary" className="mx-auto flex max-w-[1240px] items-center justify-between px-5 py-5 sm:px-8">
           <Link href="/welcome" className="flex items-center gap-2.5">
-            <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-paper">
-              <span className="font-display text-lg font-bold">C</span>
-              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-paper" />
-            </span>
+            <BrandMark size={36} />
             <span className="text-lg font-medium tracking-[-0.02em]">Campus Connect</span>
           </Link>
           <div className="hidden items-center gap-8 text-sm text-ink/70 md:flex">

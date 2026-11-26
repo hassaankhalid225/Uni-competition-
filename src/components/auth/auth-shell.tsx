@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PhysicsStage } from "@/components/landing/hero-scene";
+import { BrandMark } from "@/components/brand-mark";
 
 /** Shared look for sign in, sign up and password pages: 3D stage on one side, form on the other. */
 export function AuthShell({ children }: { children: React.ReactNode }) {
@@ -32,10 +33,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <section className="flex flex-col px-5 pb-10 sm:px-10 lg:px-16">
         <header className="flex items-center justify-between py-5">
           <Link href="/welcome" className="flex items-center gap-2.5">
-            <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-paper">
-              <span className="font-display text-base font-bold">C</span>
-              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-paper" />
-            </span>
+            <BrandMark size={32} />
             <span className="text-[17px] font-medium tracking-[-0.02em]">Campus Connect</span>
           </Link>
           <div className="flex items-center gap-1">
