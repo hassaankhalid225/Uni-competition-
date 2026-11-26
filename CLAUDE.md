@@ -4,15 +4,12 @@ This repository is a **reusable hackathon toolkit** for a university-level compe
 ~10 teams, one team advances). It holds Claude Code skills, agents, rules, workflows and templates.
 It is designed to take an *unknown* problem statement and drive it to a winning, working product.
 
-## Current mode: SETUP COMPLETE — WAITING FOR THE OFFICIAL PROBLEM STATEMENT
+## Current mode: ACTIVE PROJECT — Campus Connect (Webathon)
 
-- **Do not build any application, website, landing page, dashboard or demo project** until the
-  official problem statement (usually a PDF) has been provided, read in full, and analysed.
-- Do not invent a problem statement, dummy product, or fake features.
-- Do not scaffold an app (`create-next-app`, `vite create`, etc.) or install app dependencies yet.
-- Editing the toolkit itself (skills, rules, agents, templates, docs) is allowed.
-
-When the PDF arrives, follow the **activation protocol** below — never skip straight to code.
+The official brief has been received and analysed (`brief/`, `docs/project/01-problem-analysis.md`).
+The team chose concept B ("Department hub") with Next.js + Postgres + own auth on Vercel.
+The app lives in `src/` (see README). Planning docs: `docs/project/`. Continue from there;
+keep `src/lib/auth/permissions.ts` the single source of access rules.
 
 ## Activation protocol (when the problem statement arrives)
 
