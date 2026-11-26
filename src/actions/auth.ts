@@ -57,6 +57,17 @@ export async function login(_prev: ActionState, formData: FormData): Promise<Act
   redirect("/");
 }
 
+/** Starts "Continue with Google": Supabase sends the user to Google, then back to /auth/callback. */
+export async function signInWithGoogle() {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${await siteOrigin()}/auth/callback` },
+  });
+  if (error || !data.url) redirect("/login?error=google");
+  redirect(data.url);
+}
+
 export async function logout() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();

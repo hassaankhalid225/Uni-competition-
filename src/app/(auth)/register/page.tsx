@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthHeading } from "@/components/auth/auth-heading";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
 import { RegisterForm } from "./register-form";
 
 export const metadata = { title: "Create account" };
@@ -13,6 +14,8 @@ export default function RegisterPage() {
           Sign in
         </Link>
       </AuthHeading>
+      <GoogleButton />
+      <OrDivider />
       <RegisterForm />
     </>
   );

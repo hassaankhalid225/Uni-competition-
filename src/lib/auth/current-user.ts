@@ -30,8 +30,9 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   // First sign-in after confirming an email: create the profile. Self-service accounts are
   // always students; admins are provisioned by the department.
-  const meta = (claims.user_metadata ?? {}) as { name?: string };
-  const name = (meta.name ?? claims.email.split("@")[0]).slice(0, 80);
+  // Email sign-up stores `name`; Google provides `full_name` / `name`.
+  const meta = (claims.user_metadata ?? {}) as { name?: string; full_name?: string };
+  const name = (meta.name ?? meta.full_name ?? claims.email.split("@")[0]).slice(0, 80);
   const [created] = await db
     .insert(users)
     .values({ id: claims.sub, email: claims.email.toLowerCase(), name })
