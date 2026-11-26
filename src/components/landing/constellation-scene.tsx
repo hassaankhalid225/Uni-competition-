@@ -50,7 +50,6 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 }
 
 const ACCENT = new THREE.Color("#d2643a");
-const THREAD = new THREE.Color("#f4eee6");
 
 function hueFor(text: string) {
   let h = 0;
@@ -69,6 +68,36 @@ function usePrefersReducedMotion() {
   }, []);
   return reduced;
 }
+
+/** Follows <html data-theme>, which the theme toggle and the pre-paint script set. */
+function useIsDark() {
+  const [dark, setDark] = useState(true);
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setDark(root.dataset.theme === "dark");
+    update();
+    const mo = new MutationObserver(update);
+    mo.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => mo.disconnect();
+  }, []);
+  return dark;
+}
+
+/** Colours that change with the theme: light threads on dark, ink threads on light paper. */
+function palette(dark: boolean) {
+  return {
+    thread: new THREE.Color(dark ? "#f4eee6" : "#2a2d36"),
+    dust: new THREE.Color(dark ? "#f4eee6" : "#3a3d48"),
+    dustOpacity: dark ? 0.55 : 0.35,
+    threadBoost: dark ? 1 : 1.6,
+    nodeLightness: dark ? 0.72 : 0.62,
+    blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
+    label: dark
+      ? "border-white/15 bg-black/60 text-white/80"
+      : "border-black/10 bg-white/85 text-[#2a2d36] shadow-sm",
+  };
+}
+type Palette = ReturnType<typeof palette>;
 
 /** Soft round glow texture, generated once in a canvas (no image download). */
 function useGlowTexture() {
@@ -91,14 +120,14 @@ function useGlowTexture() {
 
 type Node = { club: SceneClub; position: THREE.Vector3; color: THREE.Color };
 
-function layoutNodes(clubs: SceneClub[]): Node[] {
+function layoutNodes(clubs: SceneClub[], lightness: number): Node[] {
   const n = Math.max(clubs.length, 1);
   return clubs.map((club, i) => {
     const angle = (i / n) * Math.PI * 2 + 0.4;
     const radius = 3.1 + (i % 2) * 0.9;
     const y = Math.sin(i * 1.7) * 1.1;
     const position = new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
-    const color = new THREE.Color().setHSL(hueFor(club.slug) / 360, 0.55, 0.72);
+    const color = new THREE.Color().setHSL(hueFor(club.slug) / 360, 0.55, lightness);
     return { club, position, color };
   });
 }
@@ -113,7 +142,7 @@ function curveBetween(a: THREE.Vector3, b: THREE.Vector3, lift = 0.9) {
 type Live = Keyframe;
 type LiveRef = React.RefObject<Live>;
 
-function Pulse({ curve, color, speed, offset, size, glow, animate, live }: { curve: THREE.Curve<THREE.Vector3>; color: THREE.Color; speed: number; offset: number; size: number; glow: THREE.Texture; animate: boolean; live: LiveRef }) {
+function Pulse({ curve, color, speed, offset, size, glow, animate, live, blending }: { curve: THREE.Curve<THREE.Vector3>; color: THREE.Color; speed: number; offset: number; size: number; glow: THREE.Texture; animate: boolean; live: LiveRef; blending: THREE.Blending }) {
   const ref = useRef<THREE.Sprite>(null);
   const point = useMemo(() => new THREE.Vector3(), []);
   useFrame(({ clock }) => {
@@ -128,12 +157,12 @@ function Pulse({ curve, color, speed, offset, size, glow, animate, live }: { cur
   });
   return (
     <sprite ref={ref}>
-      <spriteMaterial map={glow} color={color} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+      <spriteMaterial map={glow} color={color} transparent depthWrite={false} blending={blending} toneMapped={false} />
     </sprite>
   );
 }
 
-function Hub({ animate, live }: { animate: boolean; live: LiveRef }) {
+function Hub({ animate, live, pal }: { animate: boolean; live: LiveRef; pal: Palette }) {
   const core = useRef<THREE.Mesh>(null);
   const shell = useRef<THREE.Mesh>(null);
   useFrame(({ clock }, delta) => {
@@ -151,14 +180,14 @@ function Hub({ animate, live }: { animate: boolean; live: LiveRef }) {
       </mesh>
       <mesh ref={shell}>
         <icosahedronGeometry args={[0.95, 1]} />
-        <meshBasicMaterial color={THREAD} wireframe transparent opacity={0.12} />
+        <meshBasicMaterial color={pal.thread} wireframe transparent opacity={0.12 * pal.threadBoost} />
       </mesh>
       <pointLight color={ACCENT} intensity={18} distance={9} decay={1.6} />
     </group>
   );
 }
 
-function ClubNode({ node, showLabel, live }: { node: Node; showLabel: boolean; live: LiveRef }) {
+function ClubNode({ node, showLabel, live, labelClass }: { node: Node; showLabel: boolean; live: LiveRef; labelClass: string }) {
   const mesh = useRef<THREE.Mesh>(null);
   // Counter the orbit's spread scale so spheres stay the same size while drifting apart.
   useFrame(() => mesh.current?.scale.setScalar(1 / live.current.spread));
@@ -171,7 +200,7 @@ function ClubNode({ node, showLabel, live }: { node: Node; showLabel: boolean; l
       {/* Always mounted and faded with CSS: unmounting drei's Html mid-frame can throw. */}
       <Html center position={[0, 0.58, 0]} zIndexRange={[1, 0]} style={{ pointerEvents: "none" }}>
         <span
-          className="whitespace-nowrap rounded-full border border-white/15 bg-black/60 px-2.5 py-1 text-xs font-medium text-white/80 transition-opacity duration-500"
+          className={`whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium transition-opacity duration-500 ${labelClass}`}
           style={{ opacity: showLabel ? 1 : 0 }}
         >
           {node.club.name}
@@ -183,7 +212,7 @@ function ClubNode({ node, showLabel, live }: { node: Node; showLabel: boolean; l
 
 type FadeableLine = { material: THREE.Material & { opacity: number } };
 
-function Thread({ curve, base, dashed, live }: { curve: THREE.Curve<THREE.Vector3>; base: number; dashed?: boolean; live: LiveRef }) {
+function Thread({ curve, base, dashed, live, color }: { curve: THREE.Curve<THREE.Vector3>; base: number; dashed?: boolean; live: LiveRef; color: THREE.Color }) {
   const ref = useRef<FadeableLine>(null);
   const points = useMemo(() => curve.getPoints(40), [curve]);
   useFrame(() => {
@@ -193,7 +222,7 @@ function Thread({ curve, base, dashed, live }: { curve: THREE.Curve<THREE.Vector
     <Line
       ref={ref as unknown as React.Ref<never>}
       points={points}
-      color={THREAD}
+      color={color}
       transparent
       opacity={base}
       lineWidth={1}
@@ -204,7 +233,7 @@ function Thread({ curve, base, dashed, live }: { curve: THREE.Curve<THREE.Vector
   );
 }
 
-function Dust({ count, animate }: { count: number; animate: boolean }) {
+function Dust({ count, animate, color, opacity }: { count: number; animate: boolean; color: THREE.Color; opacity: number }) {
   const ref = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
     // Seeded generator keeps the starfield identical on every render (pure render).
@@ -232,7 +261,7 @@ function Dust({ count, animate }: { count: number; animate: boolean }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.035} color={THREAD} transparent opacity={0.55} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.035} color={color} transparent opacity={opacity} sizeAttenuation depthWrite={false} />
     </points>
   );
 }
@@ -260,7 +289,8 @@ function useSectionMarks() {
   return marks;
 }
 
-function Constellation({ clubs, animate, compact }: { clubs: SceneClub[]; animate: boolean; compact: boolean }) {
+function Constellation({ clubs, animate, compact, dark }: { clubs: SceneClub[]; animate: boolean; compact: boolean; dark: boolean }) {
+  const pal = useMemo(() => palette(dark), [dark]);
   const root = useRef<THREE.Group>(null);
   const spin = useRef<THREE.Group>(null);
   const orbit = useRef<THREE.Group>(null);
@@ -269,7 +299,7 @@ function Constellation({ clubs, animate, compact }: { clubs: SceneClub[]; animat
   const live = useRef<Live>({ ...KEYFRAMES.hero });
   const [labels, setLabels] = useState(true);
 
-  const nodes = useMemo(() => layoutNodes(clubs), [clubs]);
+  const nodes = useMemo(() => layoutNodes(clubs, pal.nodeLightness), [clubs, pal]);
   const hub = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   const spokes = useMemo(() => nodes.map((n) => curveBetween(hub, n.position, 0.6)), [nodes, hub]);
   const rings = useMemo(() => nodes.map((n, i) => curveBetween(n.position, nodes[(i + 1) % nodes.length].position, 1.1)), [nodes]);
@@ -324,27 +354,28 @@ function Constellation({ clubs, animate, compact }: { clubs: SceneClub[]; animat
     <>
       <group ref={root}>
         <group ref={spin}>
-          <Hub animate={animate} live={live} />
+          <Hub animate={animate} live={live} pal={pal} />
           <group ref={orbit}>
             {nodes.map((n, i) => (
               <group key={n.club.slug}>
-                <Thread curve={spokes[i]} base={0.22} live={live} />
-                <Thread curve={rings[i]} base={0.08} dashed live={live} />
-                <ClubNode node={n} showLabel={labels} live={live} />
-                <Pulse curve={spokes[i]} color={ACCENT} speed={0.22} offset={i / nodes.length} size={0.55} glow={glow} animate={animate} live={live} />
-                <Pulse curve={rings[i]} color={n.color} speed={0.12} offset={(i * 0.37) % 1} size={0.35} glow={glow} animate={animate} live={live} />
+                <Thread curve={spokes[i]} base={0.22 * pal.threadBoost} live={live} color={pal.thread} />
+                <Thread curve={rings[i]} base={0.08 * pal.threadBoost} dashed live={live} color={pal.thread} />
+                <ClubNode node={n} showLabel={labels} live={live} labelClass={pal.label} />
+                <Pulse curve={spokes[i]} color={ACCENT} speed={0.22} offset={i / nodes.length} size={0.55} glow={glow} animate={animate} live={live} blending={pal.blending} />
+                <Pulse curve={rings[i]} color={n.color} speed={0.12} offset={(i * 0.37) % 1} size={0.35} glow={glow} animate={animate} live={live} blending={pal.blending} />
               </group>
             ))}
           </group>
         </group>
       </group>
-      <Dust count={compact ? 300 : 800} animate={animate} />
+      <Dust count={compact ? 300 : 800} animate={animate} color={pal.dust} opacity={pal.dustOpacity} />
     </>
   );
 }
 
 export default function ConstellationScene({ clubs }: { clubs: SceneClub[] }) {
   const reduced = usePrefersReducedMotion();
+  const dark = useIsDark();
   const [compact, setCompact] = useState(false);
 
   useEffect(() => {
@@ -372,7 +403,7 @@ export default function ConstellationScene({ clubs }: { clubs: SceneClub[] }) {
           <Lightformer intensity={1} color="#d2643a" position={[-6, 0, 2]} scale={[3, 6, 1]} />
           <Lightformer intensity={0.8} position={[6, -2, 3]} scale={[3, 3, 1]} />
         </Environment>
-        <Constellation clubs={clubs} animate={!reduced} compact={compact} />
+        <Constellation clubs={clubs} animate={!reduced} compact={compact} dark={dark} />
       </Canvas>
     </div>
   );

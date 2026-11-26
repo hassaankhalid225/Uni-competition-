@@ -5,6 +5,7 @@ import { listMyClubs } from "@/lib/queries/clubs";
 import { logout } from "@/actions/auth";
 import { SidebarLink, TabLink } from "@/components/nav-link";
 import { Avatar, Badge, ClubMark } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { href: "/", label: "Home", icon: Home },
@@ -69,6 +70,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-ink-muted">{isAdmin ? user.adminTitle ?? "Admin" : "Student"}</p>
           </div>
+          <ThemeToggle className="text-ink-muted hover:bg-sunken hover:text-ink" />
           <form action={logout}>
             <button type="submit" aria-label="Sign out" title="Sign out" className="rounded-lg p-2 text-ink-muted hover:bg-sunken hover:text-ink">
               <LogOut size={18} />
@@ -91,6 +93,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </Link>
             )}
             {isAdmin && <Badge tone="accent">{user.adminTitle ?? "Admin"}</Badge>}
+            <ThemeToggle className="text-ink-soft hover:bg-sunken" />
             <form action={logout}>
               <button type="submit" aria-label="Sign out" className="rounded-lg p-2 text-ink-muted hover:bg-sunken">
                 <LogOut size={20} />
