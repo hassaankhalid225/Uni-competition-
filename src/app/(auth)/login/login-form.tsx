@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useRef } from "react";
 import { login } from "@/actions/auth";
 import { initialActionState } from "@/lib/action-result";
@@ -34,12 +33,7 @@ export function LoginForm() {
       <form ref={formRef} action={action} className="flex flex-col gap-5" noValidate>
         <FormMessage state={state} />
         <TextField name="email" label="Email" type="email" autoComplete="email" required state={state} inputClassName={authInput} />
-        <div className="flex flex-col gap-2">
-          <PasswordField autoComplete="current-password" state={state} />
-          <Link href="/forgot-password" className="self-end text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline">
-            Forgot password?
-          </Link>
-        </div>
+        <PasswordField autoComplete="current-password" state={state} />
         <SubmitButton pendingLabel="Signing in…" className={authSubmit}>
           Sign in
         </SubmitButton>

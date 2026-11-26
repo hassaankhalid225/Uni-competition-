@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db, users } from "@/lib/db";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { emailSchema, loginSchema, newPasswordSchema, registerSchema } from "@/lib/validation";
+import { loginSchema, registerSchema } from "@/lib/validation";
 import { validationFailure, type ActionState } from "@/lib/action-result";
 
 /** Public URL of this deployment, used in links inside confirmation / reset emails. */
@@ -72,24 +72,4 @@ export async function logout() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect("/welcome");
-}
-
-export async function requestPasswordReset(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = emailSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return validationFailure(parsed.error);
-  const supabase = await createSupabaseServerClient();
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${await siteOrigin()}/auth/callback?next=/reset-password`,
-  });
-  // Always the same answer, so the form can't be used to discover registered emails.
-  return { ok: true, message: "If an account exists for that email, a reset link is on its way." };
-}
-
-export async function updatePassword(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = newPasswordSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return validationFailure(parsed.error);
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { ok: false, message: /session/i.test(error.message) ? "This reset link has expired. Request a new one." : error.message };
-  redirect("/?password=updated");
 }
