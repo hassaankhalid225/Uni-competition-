@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
 import { HeroScene, PhysicsStage } from "@/components/landing/hero-scene";
 import { WingsDeck } from "@/components/landing/wings-deck";
-import { IntroLoader, MarkerRow, RevealLines, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
+import { IntroLoader, MarkerRow, RevealLines, ScatterWord, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
 import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { ClubMark } from "@/components/ui";
@@ -111,7 +111,7 @@ export default async function WelcomePage() {
           <div className="relative mx-auto max-w-[1240px] px-5 pb-28 pt-24 sm:px-8 lg:pt-32">
             <RevealLines
               as="h1"
-              lines={["Every club,", "notice and event.", "Connected."]}
+              lines={["Every club,", "notice and event.", <>Get <span key="c" className="fx-underline">connected.</span></>]}
               className="relative text-[3.2rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-7xl lg:ml-[16%] lg:text-[8.5rem]"
             />
             <div className="relative mt-14 grid gap-10 lg:ml-[46%]">
@@ -158,7 +158,7 @@ export default async function WelcomePage() {
             <div className="md:col-start-2">
               <Reveal>
                 <p className={eyebrow}>The problem</p>
-                <RevealLines lines={["Department life", "is scattered."]} className={`mt-4 ${h2}`} />
+                <RevealLines lines={["Department life", <>is <ScatterWord key="s" text="scattered." /></>]} className={`mt-4 ${h2}`} />
                 <p className="mt-5 text-lg leading-relaxed text-ink/65">
                   Group chats, corridor notice boards and word of mouth. Nothing is connected, so things get missed.
                 </p>
@@ -200,7 +200,7 @@ export default async function WelcomePage() {
           <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
             <Reveal className="max-w-2xl">
               <p className={eyebrow}>The platform</p>
-              <RevealLines lines={["One home screen for", "everything that", "matters today."]} className={`mt-4 ${h2}`} />
+              <RevealLines lines={[<>One <span key="h" className="fx-highlight">home screen</span> for</>, "everything that", "matters today."]} className={`mt-4 ${h2}`} />
               <p className="mt-5 text-lg leading-relaxed text-ink/65">Official notices first, then the latest from your clubs, with upcoming events always in view.</p>
             </Reveal>
             <Reveal className="relative mt-14">

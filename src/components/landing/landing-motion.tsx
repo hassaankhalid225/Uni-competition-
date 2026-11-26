@@ -155,3 +155,28 @@ export function MarkerRow({ label }: { label: string }) {
     </div>
   );
 }
+
+/** Splits a word into letters that start scattered (stable pseudo-random offsets) and settle
+ * when the parent RevealLines becomes visible; hovering the word scatters it again. */
+export function ScatterWord({ text }: { text: string }) {
+  let seed = text.length * 97;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647) * 2 - 1;
+  return (
+    <span className="fx-scatter" aria-label={text}>
+      {[...text].map((ch, i) => (
+        <span
+          key={i}
+          aria-hidden
+          style={{
+            ["--dx" as string]: `${(rnd() * 0.5).toFixed(2)}em`,
+            ["--dy" as string]: `${(rnd() * 0.6).toFixed(2)}em`,
+            ["--r" as string]: `${Math.round(rnd() * 40)}deg`,
+            transitionDelay: `${300 + i * 45}ms`,
+          }}
+        >
+          {ch}
+        </span>
+      ))}
+    </span>
+  );
+}

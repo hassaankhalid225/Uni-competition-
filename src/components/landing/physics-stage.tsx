@@ -41,7 +41,7 @@ const tmpDelta = new THREE.Vector3();
 const tmpQuat = new THREE.Quaternion();
 const AXIS = new THREE.Vector3();
 
-function step(bodies: Body[], dt: number, cursor: THREE.Vector3 | null) {
+function step(bodies: Body[], dt: number, cursor: THREE.Vector3 | null, cursorVel?: THREE.Vector3) {
   for (const b of bodies) {
     // Pull toward the centre (a little flatter in z so the pile reads as a cluster on screen).
     b.v.x += -b.p.x * 2.2 * dt;
@@ -51,8 +51,14 @@ function step(bodies: Body[], dt: number, cursor: THREE.Vector3 | null) {
       tmpDelta.subVectors(b.p, cursor);
       tmpDelta.z *= 0.3;
       const d = tmpDelta.length();
-      const reach = 2.8 + b.r;
-      if (d < reach && d > 0.0001) b.v.addScaledVector(tmpDelta.normalize(), ((reach - d) / reach) * 38 * dt);
+      const reach = 4.2 + b.r;
+      if (d < reach && d > 0.0001) {
+        const falloff = (reach - d) / reach;
+        // Strong push away from the cursor…
+        b.v.addScaledVector(tmpDelta.normalize(), falloff * 75 * dt);
+        // …plus a kick in the direction the cursor is moving, so a quick swipe throws pieces.
+        if (cursorVel) b.v.addScaledVector(cursorVel, falloff * 0.18);
+      }
     }
   }
   // Push overlapping pieces apart (pieces are treated as spheres of radius r).
@@ -74,7 +80,7 @@ function step(bodies: Body[], dt: number, cursor: THREE.Vector3 | null) {
       }
     }
   }
-  const damping = Math.exp(-dt * 2.4);
+  const damping = Math.exp(-dt * 1.5); // lower damping = pieces swing back and forth longer
   for (const b of bodies) {
     b.v.multiplyScalar(damping);
     b.p.addScaledVector(b.v, dt);
@@ -95,6 +101,9 @@ function Pieces({ count, animate, hovering }: { count: number; animate: boolean;
   const groups = useMemo(() => KINDS.map((k) => bodies.filter((b) => b.kind === k)), [bodies]);
   const refs = useRef<(THREE.InstancedMesh | null)[]>([]);
   const cursor = useMemo(() => new THREE.Vector3(), []);
+  const lastCursor = useMemo(() => new THREE.Vector3(), []);
+  const cursorVel = useMemo(() => new THREE.Vector3(), []);
+  const hadCursor = useRef(false);
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), []);
   const ray = useMemo(() => new THREE.Raycaster(), []);
 
@@ -112,7 +121,12 @@ function Pieces({ count, animate, hovering }: { count: number; animate: boolean;
     if (animate) {
       ray.setFromCamera(pointer, camera);
       const hit = hovering.current ? ray.ray.intersectPlane(plane, cursor) : null;
-      step(bodies, dt, hit);
+      if (hit && hadCursor.current) {
+        cursorVel.subVectors(hit, lastCursor).divideScalar(dt).clampLength(0, 60);
+      } else cursorVel.set(0, 0, 0);
+      if (hit) lastCursor.copy(hit);
+      hadCursor.current = Boolean(hit);
+      step(bodies, dt, hit, cursorVel);
     }
     groups.forEach((list, gi) => {
       const mesh = refs.current[gi];

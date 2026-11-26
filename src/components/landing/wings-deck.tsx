@@ -6,6 +6,7 @@
 // plain CSS 3D transforms. Reduced motion shows the cards face up, no movement.
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Clapperboard, Code2, Palette, type LucideIcon } from "lucide-react";
+import { RevealLines } from "./landing-motion";
 
 type Wing = { key: string; name: string; glyph: string; icon: LucideIcon; tasks: string[] };
 
@@ -128,16 +129,30 @@ export function WingsDeck() {
   }, []);
 
   return (
-    <section ref={section} data-scene="deck" aria-labelledby="wings-heading" className="relative h-[320vh]">
+    <section ref={section} data-scene="deck" aria-label="Four wings in every club" className="relative h-[320vh]">
       <div className="sticky top-0 flex h-dvh flex-col overflow-hidden">
         <div className="mx-auto w-full max-w-[1240px] px-5 pt-24 sm:px-8 md:pt-28">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Inside every club</p>
           <div className="mt-3 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <h2 id="wings-heading" className="text-[2.4rem] font-normal leading-[1.02] tracking-[-0.035em] sm:text-6xl">
-              Four wings.
-              <br />
-              One club.
-            </h2>
+            <RevealLines
+              lines={[
+                <span key="a" className="inline-flex items-center gap-3">
+                  Four wings.
+                  <span className="inline-flex gap-1.5" aria-hidden>
+                    {WINGS.map((w, i) => {
+                      const Icon = w.icon;
+                      return (
+                        <span key={w.key} className="fx-pop inline-flex h-[0.62em] w-[0.62em] items-center justify-center rounded-full bg-accent text-accent-ink" style={{ transitionDelay: `${700 + i * 120}ms` }}>
+                          <Icon className="h-[0.32em] w-[0.32em]" />
+                        </span>
+                      );
+                    })}
+                  </span>
+                </span>,
+                <span key="b" className="font-display italic text-accent">One club.</span>,
+              ]}
+              className="text-[2.4rem] font-normal leading-[1.08] tracking-[-0.035em] sm:text-6xl"
+            />
             <p className="max-w-sm text-[15px] leading-relaxed text-ink/65">
               Every club runs on four sub-societies. Scroll to deal the deck and meet each wing.
             </p>
