@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
-import { db, clubMembers, clubModerators, clubRequests, clubs, users } from "@/lib/db";
+import { db, clubMembers, clubModerators, clubRequests, clubs, subSocieties, users } from "@/lib/db";
 
 // Correlated subqueries use fully qualified names: on single-table selects Drizzle emits bare
 // column names, and an unqualified "id" inside a subquery would bind to the inner table.
@@ -64,6 +64,17 @@ export async function listClubModerators(clubId: string) {
     .where(eq(clubModerators.clubId, clubId))
     .orderBy(asc(users.name));
 }
+
+/** A club's wings in display order (media, graphics, coding, events: the enum's declared order). */
+export async function listClubSubSocieties(clubId: string) {
+  return db
+    .select({ id: subSocieties.id, name: subSocieties.name, description: subSocieties.description, focus: subSocieties.focus })
+    .from(subSocieties)
+    .where(eq(subSocieties.clubId, clubId))
+    .orderBy(asc(subSocieties.focus), asc(subSocieties.name));
+}
+
+export type SubSociety = Awaited<ReturnType<typeof listClubSubSocieties>>[number];
 
 export async function listMyClubRequests(userId: string) {
   return db

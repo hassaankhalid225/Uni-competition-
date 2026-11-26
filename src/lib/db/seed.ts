@@ -25,7 +25,7 @@ type AnyPgDb = PgDatabase<PgQueryResultHKT, typeof s>;
 export async function seedDatabase(db: AnyPgDb) {
   await db.execute(sql`truncate table
     bookmarks, post_votes, comments, posts, club_moderators, club_members, club_requests,
-    announcements, events, clubs, attachments, users restart identity cascade`);
+    announcements, events, sub_societies, clubs, attachments, users restart identity cascade`);
 
   const people = [
     { key: "hod", name: "Dr. Sana Qureshi", email: "hod@campus.test", role: "admin", adminTitle: "HOD" },
@@ -68,6 +68,51 @@ export async function seedDatabase(db: AnyPgDb) {
     (typeof clubDefs)[number]["key"],
     string
   >;
+
+  // Every club runs the same four wings; descriptions are club-specific.
+  const wingNames = { media: "Media", graphics: "Graphics", coding: "Coding", events: "Event Management" } as const;
+  const wingDescriptions: Record<keyof typeof c, Record<keyof typeof wingNames, string>> = {
+    ai: {
+      media: "Records the Thursday reading group and turns paper discussions into short explainer clips.",
+      graphics: "Designs the diagrams for paper walkthroughs and the posters for workshop week.",
+      coding: "Builds the club's ML demos and maintains the shared notebook repo.",
+      events: "Runs the reading group schedule, guest talks and the end-of-semester project showcase.",
+    },
+    cp: {
+      media: "Posts contest reminders and the weekly leaderboard on the department channels.",
+      graphics: "Makes the contest banners and the ICPC team's practice-season visuals.",
+      coding: "Sets and tests weekend contest problems and writes the editorials.",
+      events: "Books the labs for contests and organises the ICPC team trials.",
+    },
+    web: {
+      media: "Writes up project showcases and keeps the guild's social pages current.",
+      graphics: "Owns the guild's design kit: Figma components, icons and slide templates.",
+      coding: "Maintains the guild's starter templates and runs the code review swaps.",
+      events: "Plans the hands-on sessions, from Git basics to deployment nights.",
+    },
+    sec: {
+      media: "Summarises security news each week and publishes members' disclosure write-ups.",
+      graphics: "Designs CTF scoreboards, challenge art and the beginner's cheat sheets.",
+      coding: "Builds and hosts the practice CTF challenges on the club's sandbox.",
+      events: "Organises the Friday beginner CTFs and the inter-university team entries.",
+    },
+    game: {
+      media: "Captures gameplay trailers and streams the jam demo day.",
+      graphics: "Draws sprites, UI and promo art for jam builds; runs pixel-art clinics.",
+      coding: "Keeps the shared Unity and Godot templates and helps teams debug builds.",
+      events: "Runs the game jams, playtest evenings and the theme polls.",
+    },
+  };
+  await db.insert(s.subSocieties).values(
+    clubDefs.flatMap((d) =>
+      (Object.keys(wingNames) as (keyof typeof wingNames)[]).map((focus) => ({
+        clubId: c[d.key],
+        name: wingNames[focus],
+        focus,
+        description: wingDescriptions[d.key][focus],
+      })),
+    ),
+  );
 
   const memberships: [keyof typeof u, keyof typeof c][] = [
     ["hamza", "ai"], ["hamza", "web"], ["hamza", "cp"],

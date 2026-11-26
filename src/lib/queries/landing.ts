@@ -1,6 +1,7 @@
 import "server-only";
 import { asc, count, desc, eq, gte, sql } from "drizzle-orm";
-import { db, clubModerators, clubs, events, posts, users } from "@/lib/db";
+import { db, clubModerators, clubs, events, posts, users, type SubSocietyFocus } from "@/lib/db";
+import { listClubSubSocieties } from "@/lib/queries/clubs";
 
 /** Real numbers for the landing page, read live from the database. */
 export async function getLandingStats() {
@@ -20,6 +21,7 @@ export async function getLandingClubs() {
       slug: clubs.slug,
       description: clubs.description,
       members: sql<number>`(select count(*) from club_members cm where cm.club_id = "clubs"."id")::int`,
+      wings: sql<SubSocietyFocus[]>`array(select ss.focus::text from sub_societies ss where ss.club_id = "clubs"."id" order by ss.focus)`,
     })
     .from(clubs)
     .orderBy(asc(clubs.name))
@@ -44,7 +46,7 @@ export async function getPublicClub(slug: string) {
     .where(eq(clubs.slug, slug));
   if (!club) return null;
 
-  const [moderators, recentPosts] = await Promise.all([
+  const [moderators, recentPosts, subSocieties] = await Promise.all([
     db
       .select({ name: users.name })
       .from(clubModerators)
@@ -59,7 +61,8 @@ export async function getPublicClub(slug: string) {
       .where(eq(posts.clubId, club.id))
       .orderBy(desc(posts.createdAt))
       .limit(PUBLIC_RECENT_POSTS),
+    listClubSubSocieties(club.id),
   ]);
 
-  return { ...club, moderators: moderators.map((m) => m.name), recentPosts };
+  return { ...club, moderators: moderators.map((m) => m.name), recentPosts, subSocieties };
 }

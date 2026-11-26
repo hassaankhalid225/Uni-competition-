@@ -10,6 +10,7 @@ import {
   primaryKey,
   index,
   check,
+  unique,
   customType,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
@@ -19,6 +20,8 @@ import { sql } from "drizzle-orm";
 export const userRole = pgEnum("user_role", ["student", "admin"]);
 export const requestStatus = pgEnum("request_status", ["pending", "approved", "rejected"]);
 export const eventStatus = pgEnum("event_status", ["scheduled", "cancelled"]);
+// Order here is the display order of a club's wings.
+export const subSocietyFocus = pgEnum("sub_society_focus", ["media", "graphics", "coding", "events"]);
 
 const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   dataType: () => "bytea",
@@ -52,6 +55,20 @@ export const clubs = pgTable("clubs", {
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
   ...timestamps,
 });
+
+// Every club runs a fixed set of wings (Media, Graphics, Coding, Event Management).
+export const subSocieties = pgTable(
+  "sub_societies",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clubId: uuid("club_id").notNull().references(() => clubs.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    focus: subSocietyFocus("focus").notNull(),
+    ...timestamps,
+  },
+  (t) => [unique("sub_societies_club_name_key").on(t.clubId, t.name), index("sub_societies_club_idx").on(t.clubId)],
+);
 
 export const clubMembers = pgTable(
   "club_members",
@@ -185,3 +202,4 @@ export const events = pgTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type SubSocietyFocus = (typeof subSocietyFocus.enumValues)[number];

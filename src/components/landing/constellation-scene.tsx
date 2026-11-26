@@ -33,6 +33,8 @@ const KEYFRAMES: Record<string, Keyframe> = {
   scattered: { x: -3.6, y: 0, z: 0, scale: 0.9, spread: 1.65, threads: 0, tilt: 0.55, hub: 0.55, labels: false },
   connected: { x: 0, y: -1.7, z: 0, scale: 1.05, spread: 1, threads: 1, tilt: 0.25, hub: 1.15, labels: true },
   platform: { x: 4.8, y: 2.8, z: -6, scale: 0.8, spread: 1.1, threads: 0.6, tilt: 0.35, hub: 0.9, labels: false },
+  // Hidden while the card deck owns the screen.
+  deck: { x: 4.8, y: 2.8, z: -12, scale: 0.001, spread: 1.1, threads: 0, tilt: 0.35, hub: 0.9, labels: false },
   roles: { x: -4.6, y: 0, z: 0, scale: 0.8, spread: 0.85, threads: 1, tilt: 0.65, hub: 1, labels: false },
   clubs: { x: 0, y: 0, z: -3, scale: 1.2, spread: 1.5, threads: 0.45, tilt: 0.15, hub: 0.8, labels: false },
   team: { x: -4.4, y: -0.3, z: 0, scale: 0.85, spread: 1, threads: 1, tilt: 0.3, hub: 1, labels: false },

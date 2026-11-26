@@ -22,7 +22,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const firstName = user.name.replace(/^Dr\.?\s+/i, "").split(" ")[0];
 
   return (
-    <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
       <div className="min-w-0">
         <header className="mb-8">
           <p className="text-sm text-ink-muted">

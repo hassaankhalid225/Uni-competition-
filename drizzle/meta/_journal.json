@@ -15,6 +15,13 @@
       "when": 1795702640684,
       "tag": "0001_supabase_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795703723770,
+      "tag": "0002_sub_societies",
+      "breakpoints": true
     }
   ]
 }

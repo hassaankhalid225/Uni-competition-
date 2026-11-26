@@ -4,10 +4,12 @@ import { ArrowRight, CalendarDays, Megaphone, MessagesSquare, ShieldCheck } from
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
 import { HeroScene, PhysicsStage } from "@/components/landing/hero-scene";
+import { WingsDeck } from "@/components/landing/wings-deck";
 import { IntroLoader, MarkerRow, RevealLines, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
 import { StaggerReveal } from "@/components/landing/stagger-reveal";
 import { ClubMark } from "@/components/ui";
+import { SUB_SOCIETY_SHORT_LABEL } from "@/components/sub-society-icon";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata = {
@@ -233,6 +235,9 @@ export default async function WelcomePage() {
           </div>
         </section>
 
+        {/* ── 4b. Four wings: scroll-dealt card deck ───────────────────── */}
+        <WingsDeck />
+
         {/* ── 5. Roles: scene on the left, content on the right ──────────── */}
         <section id="roles" data-scene="roles" className="flex min-h-dvh scroll-mt-10 items-center py-24">
           <div className="mx-auto grid w-full max-w-[1240px] px-5 sm:px-8 lg:grid-cols-[2fr_3fr]">
@@ -286,6 +291,11 @@ export default async function WelcomePage() {
                       <h3 className="font-semibold">{c.name}</h3>
                       <p className="mt-0.5 font-mono text-xs text-ink/50">{c.members} members</p>
                       <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">{c.description}</p>
+                      {c.wings.length > 0 && (
+                        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/55">
+                          {[`${c.wings.length} wings`, ...c.wings.map((f) => SUB_SOCIETY_SHORT_LABEL[f])].join(" · ")}
+                        </p>
+                      )}
                     </div>
                     <ArrowRight
                       size={18}

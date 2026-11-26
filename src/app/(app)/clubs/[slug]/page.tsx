@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import { PenSquare, ShieldCheck } from "lucide-react";
 import { requireUser } from "@/lib/auth/current-user";
-import { getClubBySlug, listClubModerators } from "@/lib/queries/clubs";
+import { getClubBySlug, listClubModerators, listClubSubSocieties } from "@/lib/queries/clubs";
 import { listPosts } from "@/lib/queries/posts";
 import { PostCard } from "@/components/post-card";
 import { MembershipButton } from "@/components/membership-button";
 import { SortTabs, parseSort } from "@/components/sort-tabs";
 import { Avatar, Badge, ButtonLink, ClubMark, EmptyState } from "@/components/ui";
+import { SubSocietyIcon } from "@/components/sub-society-icon";
 
 export default async function ClubPage({ params, searchParams }: PageProps<"/clubs/[slug]">) {
   const user = await requireUser();
@@ -15,7 +16,11 @@ export default async function ClubPage({ params, searchParams }: PageProps<"/clu
   if (!club) notFound();
 
   const sort = parseSort(sp.sort);
-  const [posts, moderators] = await Promise.all([listPosts({ viewerId: user.id, clubId: club.id, sort }), listClubModerators(club.id)]);
+  const [posts, moderators, subSocieties] = await Promise.all([
+    listPosts({ viewerId: user.id, clubId: club.id, sort }),
+    listClubModerators(club.id),
+    listClubSubSocieties(club.id),
+  ]);
   const isAdmin = user.role === "admin";
   const canPost = club.isMember || club.isModerator || isAdmin;
   const canModerate = club.isModerator || isAdmin;
@@ -47,6 +52,30 @@ export default async function ClubPage({ params, searchParams }: PageProps<"/clu
             <MembershipButton clubId={club.id} isMember={club.isMember} isModerator={club.isModerator} size="md" />
           </div>
         </header>
+
+        {subSocieties.length > 0 && (
+          <section aria-labelledby="sub-societies" className="mb-10">
+            <h2 id="sub-societies" className="mb-4 font-display text-2xl font-semibold">
+              Sub-societies
+            </h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {subSocieties.map((w, i) => (
+                <li key={w.id} className="rounded-xl border border-line bg-surface p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                      <SubSocietyIcon focus={w.focus} size={16} />
+                    </span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
+                      Wing {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 font-semibold">{w.name}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">{w.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-2xl font-semibold">Discussions</h2>

@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const isAdmin = user.role === "admin";
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[1320px]">
+    <div className="flex min-h-dvh w-full">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line px-4 py-6 lg:flex">
         <Link href="/" className="mb-8 flex items-center gap-2.5 px-2">

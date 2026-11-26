@@ -8,6 +8,7 @@ import { timeAgo } from "@/lib/format";
 import { ClubMark } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { StaggerReveal } from "@/components/landing/stagger-reveal";
+import { SubSocietyIcon } from "@/components/sub-society-icon";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -92,6 +93,35 @@ export default async function PublicClubPage({ params }: Props) {
             ))}
           </dl>
         </section>
+
+        {club.subSocieties.length > 0 && (
+          <section aria-labelledby="wings" className="mt-24 lg:mt-32">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className={eyebrow}>Sub-societies</p>
+                <h2 id="wings" className="mt-4 text-[2.2rem] font-normal leading-[1.02] tracking-[-0.035em] sm:text-5xl">
+                  {club.subSocieties.length === 4 ? "Four wings, one club." : "The club's wings."}
+                </h2>
+              </div>
+              <p className="max-w-xs text-sm leading-relaxed text-ink/55">How the club splits the work. Each wing runs its own part, from recordings to contests.</p>
+            </div>
+
+            <StaggerReveal className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {club.subSocieties.map((w, i) => (
+                <li key={w.id} className="flex flex-col rounded-xl border border-ink/10 bg-surface p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                      <SubSocietyIcon focus={w.focus} size={20} />
+                    </span>
+                    <span className={label}>Wing {String(i + 1).padStart(2, "0")}</span>
+                  </div>
+                  <h3 className="mt-8 text-2xl font-normal leading-tight tracking-[-0.02em]">{w.name}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink/65">{w.description}</p>
+                </li>
+              ))}
+            </StaggerReveal>
+          </section>
+        )}
 
         <section aria-labelledby="recent" className="mt-24 lg:mt-32">
           <div className="flex flex-wrap items-end justify-between gap-4">
