@@ -5,6 +5,16 @@ import { createServerClient } from "@supabase/ssr";
 // expiring, so Server Components always see a valid session. Access control itself happens in
 // the pages and server actions, never here.
 export async function proxy(request: NextRequest) {
+  // If Supabase sends an OAuth / email `code` to a page other than the callback (it falls back to
+  // the Site URL when a redirect isn't allow-listed), forward it to the callback to finish sign-in.
+  const { pathname, searchParams } = request.nextUrl;
+  if (searchParams.has("code") && !pathname.startsWith("/auth/callback")) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/auth/callback";
+    target.search = `?code=${encodeURIComponent(searchParams.get("code")!)}&next=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(target);
+  }
+
   let response = NextResponse.next({ request });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
