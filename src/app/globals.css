@@ -148,3 +148,33 @@ body {
 .hero-rise {
   animation: hero-rise 900ms var(--ease-out) both;
 }
+
+/* Line-by-line headline reveal (landing page) */
+.reveal-lines .line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.reveal-lines .line > span {
+  display: inline-block;
+  transform: translateY(105%);
+  transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-lines[data-visible="true"] .line > span {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-lines .line > span {
+    transform: none;
+  }
+}
+
+/* Lenis smooth scrolling */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}

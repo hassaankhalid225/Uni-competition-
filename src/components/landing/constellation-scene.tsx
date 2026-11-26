@@ -27,7 +27,9 @@ type Keyframe = {
 };
 
 const KEYFRAMES: Record<string, Keyframe> = {
-  hero: { x: 3.1, y: -0.1, z: 0, scale: 1, spread: 1, threads: 1, tilt: 0.18, hub: 1, labels: true },
+  // Hidden while the physics stage owns the hero; it grows in for the next section.
+  hero: { x: -3.6, y: -4, z: -4, scale: 0.001, spread: 1.65, threads: 0, tilt: 0.55, hub: 0.55, labels: false },
+  intro: { x: -3.6, y: -4, z: -4, scale: 0.001, spread: 1.65, threads: 0, tilt: 0.55, hub: 0.55, labels: false },
   scattered: { x: -3.6, y: 0, z: 0, scale: 0.9, spread: 1.65, threads: 0, tilt: 0.55, hub: 0.55, labels: false },
   connected: { x: 0, y: -1.7, z: 0, scale: 1.05, spread: 1, threads: 1, tilt: 0.25, hub: 1.15, labels: true },
   platform: { x: 4.8, y: 2.8, z: -6, scale: 0.8, spread: 1.1, threads: 0.6, tilt: 0.35, hub: 0.9, labels: false },
@@ -38,8 +40,8 @@ const KEYFRAMES: Record<string, Keyframe> = {
 };
 
 /** On phones the scene stays centred and higher up, behind dimmed content. */
-function forCompact(k: Keyframe, key: string): Keyframe {
-  return { ...k, x: 0, y: key === "hero" ? 3.4 : k.y * 0.5 + 1.2, z: k.z - 2, labels: false };
+function forCompact(k: Keyframe): Keyframe {
+  return { ...k, x: 0, y: k.y * 0.5 + 1.2, z: k.z - 2, labels: false };
 }
 
 const NUMERIC: (keyof Omit<Keyframe, "labels">)[] = ["x", "y", "z", "scale", "spread", "threads", "tilt", "hub"];
@@ -321,9 +323,9 @@ function Constellation({ clubs, animate, compact, dark }: { clubs: SceneClub[]; 
       for (const k of NUMERIC) target[k] = from[k] + (to[k] - from[k]) * t;
       const activeKey = t < 0.5 ? fromKey : toKey;
       target.labels = KEYFRAMES[activeKey].labels;
-      if (compact) target = forCompact(target, activeKey);
+      if (compact) target = forCompact(target);
     } else if (compact) {
-      target = forCompact(target, "hero");
+      target = forCompact(target);
     }
     if (target.labels !== labels) setLabels(target.labels);
 

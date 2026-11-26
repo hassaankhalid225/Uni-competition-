@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, Megaphone, MessagesSquare, ShieldCheck } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getLandingClubs, getLandingStats } from "@/lib/queries/landing";
-import { HeroScene } from "@/components/landing/hero-scene";
+import { HeroScene, PhysicsStage } from "@/components/landing/hero-scene";
+import { IntroLoader, MarkerRow, RevealLines, ScrollArc, SmoothScroll } from "@/components/landing/landing-motion";
 import { Reveal } from "@/components/landing/reveal";
-import { ClubMark, buttonClass } from "@/components/ui";
+import { ClubMark } from "@/components/ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata = {
@@ -44,8 +45,9 @@ const ROLES = [
   { role: "Admins", who: "Head CR · Head GR · HOD", can: ["Approve or reject club requests", "Assign and remove moderators", "Publish announcements, manage events"] },
 ];
 
-const eyebrow = "text-xs font-medium uppercase tracking-[0.2em] text-accent";
-const h2 = "font-display text-4xl font-semibold leading-[1.08] sm:text-5xl";
+const eyebrow = "font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-accent";
+const h2 = "text-[2.6rem] font-normal leading-[1.02] tracking-[-0.035em] sm:text-6xl lg:text-7xl";
+const pill = "inline-flex h-11 items-center gap-2.5 rounded-full px-5 text-[13px] font-medium uppercase tracking-[0.08em] transition-colors";
 
 export default async function WelcomePage() {
   const [user, stats, clubs] = await Promise.all([getCurrentUser(), getLandingStats(), getLandingClubs()]);
@@ -54,6 +56,8 @@ export default async function WelcomePage() {
   return (
     <div className="relative bg-paper text-ink">
       {/* One fixed 3D scene behind the whole page; it follows the scroll through each section. */}
+      <IntroLoader />
+      <SmoothScroll />
       <HeroScene clubs={clubs.map((c) => ({ name: c.name, slug: c.slug }))} />
 
       {/* ── Navigation ─────────────────────────────────────────────────── */}
@@ -64,7 +68,7 @@ export default async function WelcomePage() {
               <span className="font-display text-lg font-bold">C</span>
               <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-paper" />
             </span>
-            <span className="font-display text-xl font-semibold">Campus Connect</span>
+            <span className="text-lg font-medium tracking-[-0.02em]">Campus Connect</span>
           </Link>
           <div className="hidden items-center gap-8 text-sm text-ink/70 md:flex">
             <a href="#features" className="hover:text-ink">Features</a>
@@ -74,58 +78,73 @@ export default async function WelcomePage() {
           </div>
           <div className="flex items-center gap-2">
           <ThemeToggle className="text-ink/70 hover:bg-ink/10 hover:text-ink" />
-          <Link href={user ? "/" : "/login"} className="rounded-lg border border-ink/25 px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-paper">
-            {user ? "Open app" : "Sign in"}
+          <Link href={user ? "/" : "/login"} className={`${pill} h-10 bg-ink text-paper hover:bg-accent hover:text-accent-ink`}>
+            {user ? "Open app" : "Sign in"} <span className="h-1.5 w-1.5 rounded-full bg-current" />
           </Link>
           </div>
         </nav>
       </header>
 
       <main className="relative z-10">
-        {/* ── 1. Hero: connected ───────────────────────────────────────── */}
-        <section data-scene="hero" className="relative flex min-h-dvh items-end md:items-center">
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-paper via-paper/40 to-transparent md:bg-gradient-to-r md:from-paper md:via-paper/60 md:to-transparent" />
-          <div className="relative mx-auto w-full max-w-[1240px] px-5 pb-14 pt-32 sm:px-8 md:pb-20 md:pt-32">
-            <div className="max-w-xl">
-              <p className={`hero-rise ${eyebrow}`}>University of Sargodha · Department of Computer Science</p>
-              <h1 className="hero-rise mt-5 font-display text-[2.6rem] font-semibold leading-[1.02] sm:text-6xl lg:text-7xl" style={{ animationDelay: "80ms" }}>
-                Every club, notice and event. Connected.
-              </h1>
-              <p className="hero-rise mt-6 max-w-lg text-lg leading-relaxed text-ink/70" style={{ animationDelay: "160ms" }}>
-                Campus Connect is the CS department&apos;s own community: club discussions, official announcements from the
-                Head CR, Head GR and HOD, and the event calendar, in one place.
-              </p>
-              <div className="hero-rise mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
-                <Link href={primaryCta.href} className={buttonClass("primary", "md", "h-12 px-6 text-[15px]")}>
-                  {primaryCta.label} <ArrowRight size={16} />
-                </Link>
-                {!user && (
-                  <Link href="/login" className="inline-flex h-12 items-center rounded-lg border border-ink/25 px-6 text-[15px] font-medium transition-colors hover:bg-ink/10">
-                    I already have an account
-                  </Link>
-                )}
+        {/* ── 1. Hero: interactive 3D stage + headline ─────────────────── */}
+        <section data-scene="hero" className="relative">
+          <div className="px-3 pt-20 sm:px-5 sm:pt-24">
+            <div className="relative h-[64dvh] overflow-hidden rounded-[28px] bg-night sm:h-[74dvh] dark:bg-[#22252c]">
+              <PhysicsStage />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-5 font-mono text-[11px] uppercase tracking-[0.18em] text-snow/70 sm:p-7">
+                <span>University of Sargodha<br />Department of Computer Science</span>
+                <span className="hidden text-right sm:block">Move your cursor<br />through the pile</span>
               </div>
-              <dl className="hero-rise mt-14 grid max-w-lg grid-cols-4 gap-4 border-t border-ink/15 pt-6" style={{ animationDelay: "320ms" }}>
-                {[
-                  [stats.clubs, "clubs"],
-                  [stats.students, "students"],
-                  [stats.discussions, "discussions"],
-                  [stats.upcomingEvents, "upcoming events"],
-                ].map(([value, label]) => (
-                  <div key={label}>
-                    <dt className="sr-only">{label}</dt>
-                    <dd className="font-display text-3xl font-semibold tabular-nums">{value}</dd>
-                    <dd className="mt-0.5 text-xs text-ink/55">{label}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="mt-3 text-[11px] text-ink/40">Live counts from the platform.</p>
+            </div>
+            <div className="px-2 pt-4 sm:px-3">
+              <MarkerRow label="Scroll to explore" />
             </div>
           </div>
-          <div className="absolute bottom-6 right-8 hidden items-center gap-5 text-xs text-ink/55 lg:flex">
-            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-accent" /> Department hub</span>
-            <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#9aa8cf]" /> Clubs</span>
-            <span className="flex items-center gap-2"><span className="h-1 w-5 rounded-full bg-gradient-to-r from-transparent to-accent" /> Announcements reaching every club</span>
+        </section>
+
+        <section data-scene="intro" className="relative">
+          <div className="relative mx-auto max-w-[1240px] px-5 pb-28 pt-24 sm:px-8 lg:pt-32">
+            <ScrollArc className="absolute -left-10 -top-6 hidden h-[420px] w-[420px] text-accent md:block" />
+            <RevealLines
+              as="h1"
+              lines={["Every club,", "notice and event.", "Connected."]}
+              className="relative text-[3.2rem] font-normal leading-[0.98] tracking-[-0.045em] sm:text-7xl lg:ml-[16%] lg:text-[8.5rem]"
+            />
+            <div className="relative mt-14 grid gap-10 lg:ml-[46%]">
+              <Reveal>
+                <p className="max-w-md text-lg leading-relaxed text-ink/70">
+                  Campus Connect is the CS department&apos;s own community: club discussions, official announcements from the
+                  Head CR, Head GR and HOD, and the event calendar, in one place.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link href={primaryCta.href} className={`${pill} bg-accent text-accent-ink hover:bg-ink hover:text-paper`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" /> {primaryCta.label}
+                  </Link>
+                  {!user && (
+                    <Link href="/login" className={`${pill} border border-ink/20 hover:bg-ink hover:text-paper`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" /> Sign in
+                    </Link>
+                  )}
+                </div>
+              </Reveal>
+              <Reveal delay={120}>
+                <dl className="grid max-w-md grid-cols-4 gap-4 border-t border-ink/15 pt-6">
+                  {[
+                    [stats.clubs, "clubs"],
+                    [stats.students, "students"],
+                    [stats.discussions, "discussions"],
+                    [stats.upcomingEvents, "upcoming events"],
+                  ].map(([value, label]) => (
+                    <div key={label}>
+                      <dt className="sr-only">{label}</dt>
+                      <dd className="text-3xl font-normal tracking-[-0.03em] tabular-nums">{value}</dd>
+                      <dd className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/55">{label}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink/40">Live counts from the platform</p>
+              </Reveal>
+            </div>
           </div>
         </section>
 
@@ -135,7 +154,7 @@ export default async function WelcomePage() {
             <div className="md:col-start-2">
               <Reveal>
                 <p className={eyebrow}>The problem</p>
-                <h2 className={`mt-4 ${h2}`}>Department life is scattered.</h2>
+                <RevealLines lines={["Department life", "is scattered."]} className={`mt-4 ${h2}`} />
                 <p className="mt-5 text-lg leading-relaxed text-ink/65">
                   Group chats, corridor notice boards and word of mouth. Nothing is connected, so things get missed.
                 </p>
@@ -165,7 +184,7 @@ export default async function WelcomePage() {
         <section data-scene="connected" className="flex min-h-dvh items-start pt-28 md:pt-36">
           <Reveal className="mx-auto max-w-3xl px-5 text-center sm:px-8">
             <p className={eyebrow}>The answer</p>
-            <h2 className={`mt-4 ${h2} lg:text-6xl`}>Campus Connect brings it all back together.</h2>
+            <RevealLines lines={["Campus Connect brings", "it all back together."]} className={`mt-4 ${h2}`} />
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink/65">
               One official hub for the department. Every club connected to it. Every notice reaching every student.
             </p>
@@ -177,7 +196,7 @@ export default async function WelcomePage() {
           <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
             <Reveal className="max-w-2xl">
               <p className={eyebrow}>The platform</p>
-              <h2 className={`mt-4 ${h2}`}>One home screen for everything that matters today.</h2>
+              <RevealLines lines={["One home screen for", "everything that", "matters today."]} className={`mt-4 ${h2}`} />
               <p className="mt-5 text-lg leading-relaxed text-ink/65">Official notices first, then the latest from your clubs, with upcoming events always in view.</p>
             </Reveal>
             <Reveal className="relative mt-14">
@@ -218,14 +237,14 @@ export default async function WelcomePage() {
             <div className="lg:col-start-2">
               <Reveal>
                 <p className={eyebrow}>Roles &amp; access</p>
-                <h2 className={`mt-4 ${h2}`}>Built around how the department actually works.</h2>
+                <RevealLines lines={["Built around how", "the department", "actually works."]} className={`mt-4 ${h2}`} />
               </Reveal>
               <div className="mt-10 divide-y divide-ink/10 border-y border-ink/10">
                 {ROLES.map((r, i) => (
                   <Reveal key={r.role} delay={i * 80}>
                     <div className="py-7">
                       <div className="flex flex-wrap items-baseline gap-x-4">
-                        <h3 className="font-display text-3xl font-semibold">{r.role}</h3>
+                        <h3 className="text-3xl font-normal tracking-[-0.03em]">{r.role}</h3>
                         <p className="text-sm text-ink/55">{r.who}</p>
                       </div>
                       <ul className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -247,7 +266,7 @@ export default async function WelcomePage() {
             <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <div className="max-w-2xl">
                 <p className={eyebrow}>Communities</p>
-                <h2 className={`mt-4 ${h2}`}>Clubs already on Campus Connect.</h2>
+                <RevealLines lines={["Clubs already on", "Campus Connect."]} className={`mt-4 ${h2}`} />
               </div>
               <Link href={user ? "/clubs/request" : "/register"} className="inline-flex items-center gap-2 font-medium text-accent hover:underline">
                 Missing one? Request a club <ArrowRight size={16} />
@@ -280,7 +299,7 @@ export default async function WelcomePage() {
             <div className="md:col-start-2">
               <Reveal>
                 <p className={eyebrow}>Campus Connect Webathon</p>
-                <h2 className={`mt-4 ${h2}`}>Made at the University of Sargodha.</h2>
+                <RevealLines lines={["Made at the", "University of", "Sargodha."]} className={`mt-4 ${h2}`} />
                 <p className="mt-5 max-w-md leading-relaxed text-ink/65">
                   Designed and built in four hours by students of the Department of Computer Science, with Next.js,
                   PostgreSQL and Three.js.
@@ -290,7 +309,7 @@ export default async function WelcomePage() {
                 <ul className="mt-10 grid grid-cols-2 gap-3">
                   {TEAM.map((name) => (
                     <li key={name} className="flex items-center gap-4 rounded-xl border border-ink/10 bg-paper/70 p-4 backdrop-blur-md">
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ink font-display text-lg font-semibold text-paper">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ink text-base font-medium text-paper">
                         {name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                       </span>
                       <span className="font-medium">{name}</span>
@@ -305,9 +324,9 @@ export default async function WelcomePage() {
         {/* ── 8. Finale ─────────────────────────────────────────────────── */}
         <section data-scene="finale" className="flex min-h-dvh flex-col justify-end">
           <Reveal className="mx-auto mb-20 max-w-3xl px-5 text-center sm:px-8">
-            <h2 className={`${h2} lg:text-6xl`}>Your department, finally in one place.</h2>
-            <Link href={primaryCta.href} className={buttonClass("primary", "md", "mt-9 h-12 px-7 text-[15px]")}>
-              {primaryCta.label} <ArrowRight size={16} />
+            <RevealLines lines={["Your department,", "finally in one place."]} className={h2} />
+            <Link href={primaryCta.href} className={`${pill} mt-10 bg-accent text-accent-ink hover:bg-ink hover:text-paper`}>
+              <span className="h-1.5 w-1.5 rounded-full bg-current" /> {primaryCta.label}
             </Link>
           </Reveal>
           <footer className="border-t border-ink/10 bg-paper/80 backdrop-blur-md">
