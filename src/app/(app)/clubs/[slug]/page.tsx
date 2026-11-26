@@ -23,9 +23,9 @@ export default async function ClubPage({ params, searchParams }: PageProps<"/clu
   return (
     <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="min-w-0">
-        <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center">
+        <header className="mb-8 flex flex-wrap items-center gap-x-5 gap-y-4">
           <ClubMark name={club.name} slug={club.slug} size="lg" />
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-48">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">{club.name}</h1>
               {club.isModerator && (
@@ -38,7 +38,7 @@ export default async function ClubPage({ params, searchParams }: PageProps<"/clu
               {club.memberCount} members · {club.postCount} posts
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             {canPost && (
               <ButtonLink href={`/clubs/${club.slug}/new`}>
                 <PenSquare size={16} /> New post

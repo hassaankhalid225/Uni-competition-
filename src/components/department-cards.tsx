@@ -8,14 +8,15 @@ export function AnnouncementCard({ a, compact = false, children }: { a: Announce
   return (
     <article className="relative rounded-xl border border-line bg-surface p-5 pl-6">
       <span aria-hidden className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-accent" />
-      <div className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-muted">
         <Badge tone="accent">Official</Badge>
         <span className="font-medium text-ink-soft">
           {a.authorName}
           {a.authorTitle ? `, ${a.authorTitle}` : ""}
         </span>
-        <span aria-hidden>·</span>
-        <time dateTime={a.createdAt.toISOString()}>{formatDateTime(a.createdAt)}</time>
+        <time dateTime={a.createdAt.toISOString()} className="basis-full">
+          Published {formatDateTime(a.createdAt)}
+        </time>
       </div>
       <h2 className={cx("mt-2 font-display font-semibold leading-snug text-ink", compact ? "text-lg" : "text-xl")}>{a.title}</h2>
       <p className={cx("mt-2 whitespace-pre-line leading-relaxed text-ink-soft", compact ? "line-clamp-2 text-sm" : "text-[15px]")}>{a.body}</p>

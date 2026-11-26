@@ -11,8 +11,9 @@ export const metadata = { title: "Admin console" };
 
 const STATUS_TONE = { pending: "warning", approved: "success", rejected: "danger" } as const;
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const admin = await requireAdmin();
+  const notice = (await searchParams).notice;
   const [requests, clubs, students] = await Promise.all([listClubRequests(), listClubsWithModerators(), listStudents()]);
   const pending = requests.filter((r) => r.status === "pending");
   const reviewed = requests.filter((r) => r.status !== "pending").slice(0, 8);
@@ -24,6 +25,12 @@ export default async function AdminPage() {
         title="Admin console"
         description="Head CR, Head GR and HOD share this console. Review club requests and assign moderators."
       />
+
+      {typeof notice === "string" && (
+        <p role="status" className="mb-6 rounded-xl bg-success-soft px-4 py-3 text-sm text-success">
+          {notice}
+        </p>
+      )}
 
       <section aria-labelledby="requests-heading" className="mb-12">
         <div className="mb-4 flex items-center gap-3">

@@ -2,6 +2,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, clubs, clubMembers, clubModerators, clubRequests, users } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -51,11 +52,13 @@ export async function reviewClubRequest(_prev: ActionState, formData: FormData):
       .update(clubRequests)
       .set({ status: decision, reviewedBy: admin.id, reviewedAt: new Date(), reviewNote: note, clubId })
       .where(eq(clubRequests.id, requestId));
-    return { ok: true, message: decision === "approved" ? `“${request.name}” is now live.` : "Request rejected." };
+    return { ok: true, message: decision === "approved" ? `“${request.name}” approved. The club is now live.` : `“${request.name}” rejected.` };
   });
 
+  if (!result.ok) return result;
   revalidatePath("/", "layout");
-  return result;
+  // The reviewed card leaves the pending list, so report the outcome at page level.
+  redirect(`/admin?notice=${encodeURIComponent(result.message)}`);
 }
 
 const moderatorSchema = z.object({ clubId: z.uuid(), userId: z.uuid() });

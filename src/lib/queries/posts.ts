@@ -1,6 +1,6 @@
 import "server-only";
 import { and, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
-import { db, attachments, bookmarks, clubMembers, clubs, comments, postVotes, posts, users } from "@/lib/db";
+import { db, attachments, bookmarks, clubMembers, clubs, comments, posts, users } from "@/lib/db";
 
 export type FeedSort = "new" | "top";
 
@@ -13,15 +13,15 @@ type FeedOptions = {
   limit?: number;
 };
 
-// Aggregates are computed with correlated subqueries: simple to read, and fast thanks to the
-// composite primary keys / indexes on post_votes, comments and bookmarks.
-const score = sql<number>`coalesce((select sum(${postVotes.value}) from ${postVotes} where ${postVotes.postId} = ${posts.id}), 0)::int`;
-const commentCount = sql<number>`(select count(*) from ${comments} where ${comments.postId} = ${posts.id})::int`;
+// Aggregates are correlated subqueries with fully qualified names (see note in clubs.ts). They stay
+// fast thanks to the composite primary keys / indexes on post_votes, comments and bookmarks.
+const score = sql<number>`coalesce((select sum(v.value) from post_votes v where v.post_id = "posts"."id"), 0)::int`;
+const commentCount = sql<number>`(select count(*) from comments c where c.post_id = "posts"."id")::int`;
 
 function viewerFields(viewerId: string) {
   return {
-    myVote: sql<number>`coalesce((select ${postVotes.value} from ${postVotes} where ${postVotes.postId} = ${posts.id} and ${postVotes.userId} = ${viewerId}), 0)::int`,
-    isBookmarked: sql<boolean>`exists(select 1 from ${bookmarks} where ${bookmarks.postId} = ${posts.id} and ${bookmarks.userId} = ${viewerId})`,
+    myVote: sql<number>`coalesce((select v.value from post_votes v where v.post_id = "posts"."id" and v.user_id = ${viewerId}), 0)::int`,
+    isBookmarked: sql<boolean>`exists(select 1 from bookmarks b where b.post_id = "posts"."id" and b.user_id = ${viewerId})`,
   };
 }
 

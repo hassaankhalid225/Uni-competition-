@@ -1,14 +1,16 @@
 import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
-import { db, clubMembers, clubModerators, clubRequests, clubs, posts, users } from "@/lib/db";
+import { db, clubMembers, clubModerators, clubRequests, clubs, users } from "@/lib/db";
 
-const memberCount = sql<number>`(select count(*) from ${clubMembers} where ${clubMembers.clubId} = ${clubs.id})::int`;
-const postCount = sql<number>`(select count(*) from ${posts} where ${posts.clubId} = ${clubs.id})::int`;
+// Correlated subqueries use fully qualified names: on single-table selects Drizzle emits bare
+// column names, and an unqualified "id" inside a subquery would bind to the inner table.
+const memberCount = sql<number>`(select count(*) from club_members cm where cm.club_id = "clubs"."id")::int`;
+const postCount = sql<number>`(select count(*) from posts p where p.club_id = "clubs"."id")::int`;
 
 function viewerFlags(viewerId: string) {
   return {
-    isMember: sql<boolean>`exists(select 1 from ${clubMembers} where ${clubMembers.clubId} = ${clubs.id} and ${clubMembers.userId} = ${viewerId})`,
-    isModerator: sql<boolean>`exists(select 1 from ${clubModerators} where ${clubModerators.clubId} = ${clubs.id} and ${clubModerators.userId} = ${viewerId})`,
+    isMember: sql<boolean>`exists(select 1 from club_members cm where cm.club_id = "clubs"."id" and cm.user_id = ${viewerId})`,
+    isModerator: sql<boolean>`exists(select 1 from club_moderators m where m.club_id = "clubs"."id" and m.user_id = ${viewerId})`,
   };
 }
 
