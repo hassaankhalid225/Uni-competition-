@@ -51,13 +51,13 @@ function CardFront({ wing, index }: { wing: Wing; index: number }) {
       <div className="flex items-start justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-muted">Wing 0{index + 1}</p>
-          <h3 className="mt-1 text-base font-medium leading-tight tracking-[-0.02em] sm:text-xl">{wing.name}</h3>
+          <h3 className="mt-1 text-[15px] font-medium leading-tight tracking-[-0.02em] sm:text-xl">{wing.name}</h3>
         </div>
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink sm:h-9 sm:w-9">
           <Icon size={18} />
         </span>
       </div>
-      <ul className="mt-3 flex-1 space-y-1.5 text-xs text-ink-soft sm:mt-5 sm:space-y-2 sm:text-sm [&>li:nth-child(n+4)]:hidden sm:[&>li:nth-child(n+4)]:block">
+      <ul className="mt-3 flex-1 space-y-1.5 text-xs text-ink-soft sm:mt-5 sm:space-y-2 sm:text-sm [&>li:nth-child(n+3)]:hidden sm:[&>li:nth-child(n+3)]:block">
         {wing.tasks.map((t) => (
           <li key={t} className="border-b border-line pb-1.5 sm:pb-2">
             {t}
@@ -104,7 +104,7 @@ export function WingsDeck() {
         const row = isSmall ? Math.floor(i / 2) : 0;
         const cols = isSmall ? 2 : 4;
         const fx = (col - (cols - 1) / 2) * (cardW + gap);
-        const fy = isSmall ? (row - 0.5) * (cardW * 1.3 + gap) - 24 : 0;
+        const fy = isSmall ? (row - 0.5) * (cardW * 1.3 + gap) + 8 : 0;
         // Start: stacked deck below centre, slightly fanned.
         const sx = (i - 1.5) * 4;
         const sy = vh * 0.32 + i * -3;
@@ -131,7 +131,7 @@ export function WingsDeck() {
   return (
     <section ref={section} data-scene="deck" aria-label="Four wings in every club" className="relative h-[320vh]">
       <div className="sticky top-0 flex h-dvh flex-col overflow-hidden">
-        <div className="mx-auto w-full max-w-[1240px] px-5 pt-24 sm:px-8 md:pt-28">
+        <div className="mx-auto w-full max-w-[1240px] px-5 pt-20 sm:px-8 md:pt-28">
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Inside every club</p>
           <div className="mt-3 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <RevealLines
@@ -153,7 +153,7 @@ export function WingsDeck() {
               ]}
               className="text-[2.4rem] font-normal leading-[1.08] tracking-[-0.035em] sm:text-6xl"
             />
-            <p className="max-w-sm text-[15px] leading-relaxed text-ink/65">
+            <p className="hidden max-w-sm text-[15px] leading-relaxed text-ink/65 sm:block">
               Every club runs on four sub-societies. Scroll to deal the deck and meet each wing.
             </p>
           </div>

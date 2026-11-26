@@ -279,3 +279,8 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   .fx-pop { transform: none; transition: none; }
 }
+
+/* Hero poster fades out once the live 3D stage has rendered */
+[data-stage-ready="true"] > .stage-poster {
+  opacity: 0;
+}

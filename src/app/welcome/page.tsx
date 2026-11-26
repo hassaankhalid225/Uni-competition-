@@ -91,6 +91,11 @@ export default async function WelcomePage() {
         <section data-scene="hero" className="relative">
           <div className="px-3 pt-20 sm:px-5 sm:pt-24">
             <div className="relative h-[64dvh] overflow-hidden rounded-[28px] bg-night sm:h-[74dvh] dark:bg-[#22252c]">
+              {/* Server-rendered still of the pile: visible before any JS loads, hidden once the live scene is ready. */}
+              <picture className="stage-poster pointer-events-none absolute inset-0 transition-opacity duration-700">
+                <source media="(max-width: 767px)" srcSet="/landing/stage-poster-mobile.webp" />
+                <img src="/landing/stage-poster-desktop.webp" alt="" fetchPriority="high" className="h-full w-full object-cover" />
+              </picture>
               <PhysicsStage />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between p-5 font-mono text-[11px] uppercase tracking-[0.18em] text-snow/70 sm:p-7">
                 <span>University of Sargodha<br />Department of Computer Science</span>

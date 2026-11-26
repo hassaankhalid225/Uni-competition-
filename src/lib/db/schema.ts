@@ -43,6 +43,8 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   role: userRole("role").notNull().default("student"),
   adminTitle: text("admin_title"),
+  // Profile photo from the sign-in provider (e.g. Google), refreshed on each sign-in.
+  avatarUrl: text("avatar_url"),
   ...timestamps,
 });
 

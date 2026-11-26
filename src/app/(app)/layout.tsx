@@ -66,7 +66,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="mt-4 flex items-center gap-3 border-t border-line pt-4">
-          <Avatar name={user.name} />
+          <Avatar name={user.name} src={user.avatarUrl} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-ink-muted">{isAdmin ? user.adminTitle ?? "Admin" : "Student"}</p>
@@ -95,6 +95,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             )}
             {isAdmin && <Badge tone="accent">{user.adminTitle ?? "Admin"}</Badge>}
             <ThemeToggle className="text-ink-soft hover:bg-sunken" />
+            <Avatar name={user.name} src={user.avatarUrl} size="sm" />
             <form action={logout}>
               <button type="submit" aria-label="Sign out" className="rounded-lg p-2 text-ink-muted hover:bg-sunken">
                 <LogOut size={20} />

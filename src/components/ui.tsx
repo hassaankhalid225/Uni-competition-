@@ -75,7 +75,18 @@ export function ClubMark({ name, slug, size = "md" }: { name: string; slug: stri
   );
 }
 
-export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+export function Avatar({ name, size = "md", src }: { name: string; size?: "sm" | "md"; src?: string | null }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- remote provider photo (Google), tiny and cached by the browser
+      <img
+        src={src}
+        alt=""
+        referrerPolicy="no-referrer"
+        className={cx("shrink-0 rounded-full object-cover ring-1 ring-line", size === "sm" ? "h-6 w-6" : "h-9 w-9")}
+      />
+    );
+  }
   const initials = name
     .replace(/^Dr\.?\s+/i, "")
     .split(/\s+/)

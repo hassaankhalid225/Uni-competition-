@@ -11,9 +11,10 @@ export type SessionUser = {
   email: string;
   role: "student" | "admin";
   adminTitle: string | null;
+  avatarUrl: string | null;
 };
 
-const profileColumns = { id: users.id, name: users.name, email: users.email, role: users.role, adminTitle: users.adminTitle };
+const profileColumns = { id: users.id, name: users.name, email: users.email, role: users.role, adminTitle: users.adminTitle, avatarUrl: users.avatarUrl };
 
 /**
  * The signed-in user, or null. Supabase Auth proves *who* the person is (verified JWT claims);
@@ -25,17 +26,25 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const claims = data?.claims;
   if (!claims?.sub || !claims.email) return null;
 
-  const [profile] = await db.select(profileColumns).from(users).where(eq(users.id, claims.sub));
-  if (profile) return profile;
+  // Email sign-up stores `name`; Google provides `full_name` / `name` and `avatar_url` / `picture`.
+  const meta = (claims.user_metadata ?? {}) as { name?: string; full_name?: string; avatar_url?: string; picture?: string };
+  const avatarUrl = meta.avatar_url ?? meta.picture ?? null;
 
-  // First sign-in after confirming an email: create the profile. Self-service accounts are
-  // always students; admins are provisioned by the department.
-  // Email sign-up stores `name`; Google provides `full_name` / `name`.
-  const meta = (claims.user_metadata ?? {}) as { name?: string; full_name?: string };
+  const [profile] = await db.select(profileColumns).from(users).where(eq(users.id, claims.sub));
+  if (profile) {
+    if (avatarUrl && avatarUrl !== profile.avatarUrl) {
+      await db.update(users).set({ avatarUrl }).where(eq(users.id, profile.id));
+      return { ...profile, avatarUrl };
+    }
+    return profile;
+  }
+
+  // First sign-in (Google, or after confirming an email): create the profile. Self-service
+  // accounts are always students; admins are provisioned by the department.
   const name = (meta.name ?? meta.full_name ?? claims.email.split("@")[0]).slice(0, 80);
   const [created] = await db
     .insert(users)
-    .values({ id: claims.sub, email: claims.email.toLowerCase(), name })
+    .values({ id: claims.sub, email: claims.email.toLowerCase(), name, avatarUrl })
     .onConflictDoNothing()
     .returning(profileColumns);
   return created ?? null;

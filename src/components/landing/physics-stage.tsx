@@ -7,8 +7,9 @@
 // separation, cursor repulsion, damping.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
+// Built-in studio lighting from three.js itself: keeps the hero independent of the heavier drei bundle.
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 type Kind = "sphere" | "capsule" | "ring";
 type Body = { kind: Kind; r: number; p: THREE.Vector3; v: THREE.Vector3; q: THREE.Quaternion; spin: THREE.Vector3; color: THREE.Color };
@@ -163,7 +164,8 @@ function Pieces({ count, animate, hovering }: { count: number; animate: boolean;
 }
 
 /** `distance`: camera distance on desktop; larger shows the pile smaller (tall cards need more). */
-export default function PhysicsStage({ distance = 15, offsetY = 0 }: { distance?: number; offsetY?: number }) {
+export default function PhysicsStage({ distance = 15, offsetY = 0, poster }: { distance?: number; offsetY?: number; poster?: { desktop: string; mobile: string } }) {
+  const [ready, setReady] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const [compact, setCompact] = useState(false);
@@ -199,7 +201,33 @@ export default function PhysicsStage({ distance = 15, offsetY = 0 }: { distance?
       onPointerEnter={() => (hovering.current = true)}
       onPointerLeave={() => (hovering.current = false)}
     >
+      {/* A still image of the pile shows instantly; the live scene fades in over it once ready. */}
+      {poster && (
+        <picture>
+          <source media="(max-width: 767px)" srcSet={poster.mobile} />
+          <img
+            src={poster.desktop}
+            alt=""
+            fetchPriority="high"
+            className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}
+          />
+        </picture>
+      )}
       <Canvas
+        className={`transition-opacity duration-700 ${ready || !poster ? "opacity-100" : "opacity-0"}`}
+        onCreated={({ gl, scene }) => {
+          const pmrem = new THREE.PMREMGenerator(gl);
+          scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+          scene.environmentIntensity = 0.45; // reflections only; keep the brand colours deep
+          pmrem.dispose();
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              setReady(true);
+              // Lets a server-rendered poster on the parent fade out (see .stage-poster in globals.css).
+              container.current?.parentElement?.setAttribute("data-stage-ready", "true");
+            }),
+          );
+        }}
         frameloop={visible ? "always" : "never"}
         dpr={[1, compact ? 1.5 : 1.75]}
         camera={{ position: [0, offsetY, compact ? 22 : distance], fov: 35 }}
@@ -208,12 +236,8 @@ export default function PhysicsStage({ distance = 15, offsetY = 0 }: { distance?
       >
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 8, 6]} intensity={1.6} />
-        <Environment resolution={128}>
-          <Lightformer intensity={3} position={[0, 6, -4]} scale={[14, 4, 1]} />
-          <Lightformer intensity={1.4} color="#d2643a" position={[-8, 0, 3]} scale={[4, 8, 1]} />
-          <Lightformer intensity={1.2} position={[8, -2, 4]} scale={[4, 4, 1]} />
-          <Lightformer intensity={0.6} position={[0, -6, 2]} scale={[10, 2, 1]} />
-        </Environment>
+        {/* Warm rim light from the left keeps the terracotta glow of the brand. */}
+        <pointLight color="#d2643a" position={[-9, 1, 5]} intensity={60} distance={30} />
         <Pieces count={compact ? 26 : 42} animate={!reduced} hovering={hovering} />
       </Canvas>
     </div>

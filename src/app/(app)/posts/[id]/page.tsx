@@ -37,7 +37,7 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
         <VoteControl postId={post.id} score={post.score} myVote={post.myVote} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
-            <Avatar name={post.authorName} size="sm" />
+            <Avatar name={post.authorName} src={post.authorAvatar} size="sm" />
             <span className="font-medium text-ink-soft">{post.authorName}</span>
             <span aria-hidden>·</span>
             <time dateTime={post.createdAt.toISOString()} title={formatDateTime(post.createdAt)}>
@@ -126,7 +126,7 @@ function Comment({ node, postId, user, canModerate, canParticipate, depth }: { n
   return (
     <li>
       <div className="flex gap-3">
-        <Avatar name={node.authorName} size="sm" />
+        <Avatar name={node.authorName} src={node.authorAvatar} size="sm" />
         <div className="min-w-0 flex-1">
           <p className="text-xs text-ink-muted">
             <span className="font-medium text-ink-soft">{node.authorName}</span> · <time dateTime={node.createdAt.toISOString()}>{timeAgo(node.createdAt)}</time>

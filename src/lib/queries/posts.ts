@@ -34,6 +34,7 @@ const postColumns = {
   createdAt: posts.createdAt,
   authorId: posts.authorId,
   authorName: users.name,
+  authorAvatar: users.avatarUrl,
   clubId: clubs.id,
   clubName: clubs.name,
   clubSlug: clubs.slug,
@@ -94,6 +95,7 @@ export type CommentNode = {
   createdAt: Date;
   authorId: string;
   authorName: string;
+  authorAvatar: string | null;
   replies: CommentNode[];
 };
 
@@ -107,6 +109,7 @@ export async function getCommentTree(postId: string): Promise<CommentNode[]> {
       createdAt: comments.createdAt,
       authorId: comments.authorId,
       authorName: users.name,
+      authorAvatar: users.avatarUrl,
     })
     .from(comments)
     .innerJoin(users, eq(users.id, comments.authorId))
